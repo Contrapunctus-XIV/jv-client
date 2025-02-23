@@ -11,5 +11,6 @@
   "navigationLinks": {
     "NPM": "https://www.npmjs.com/package/jv-client",
     "GitHub": "https://github.com/Contrapunctus-XIV/jv-client"
-  }
+  },
+  "readme": "guides/index.md"
 }

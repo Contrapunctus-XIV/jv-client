@@ -3,8 +3,6 @@
 
 **JVClient** est une librairie pour [Node.js](https://nodejs.org/en) qui permet d'interagir avec le site [jeuxvideo.com](https://www.jeuxvideo.com) et son API.
 
-La documentation complète est trouvable [ici](https://contrapunctus-xiv.github.io/jv-client/).
-
 ### Motivations
 Cette librairie a été conçue pour répondre à deux besoins :
 - Récupérer des données à propos des contenus de la rédaction (articles, actualités, vidéos, etc.), des jeux vidéo répertoriés par JVC et des forums ;
@@ -30,3 +28,9 @@ En me rendant sur la page JVFlux titrée « [documentation de l'API de jeuxvideo
 
 ### Contact
 Pour toute question, je suis joignable sur Discord sous le pseudo `contrapunctus_1`.
+
+<style>
+    .tsd-page-title {
+        display: none;
+    }
+</style>
