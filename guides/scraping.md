@@ -64,6 +64,6 @@ for await (const page of V4.getGames({ raw: true })) {
 
 Ici, `page` sera du type {@link types.V4Types.Games.Raw | `V4Types.Games.Raw`}.
 
-### `Queries`
+### Query
 
-Enfin, les *page scrapers* de la classe statique {@link scrapers.V4 | `V4`} contiennent un paramètre supplémentaire, le paramètre `queries`, qui prend un objet associant aux critères de recherche appropriés la valeur souhaitée pour affiner les résultats.
+Enfin, les *page scrapers* de la classe statique {@link scrapers.V4 | `V4`} contiennent un paramètre supplémentaire, le paramètre `query`, qui prend un objet associant aux critères de recherche appropriés la valeur souhaitée pour affiner les résultats.
