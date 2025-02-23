@@ -1,5 +1,10 @@
-# JVClient
-## Un client pour jeuxvideo.com
+<div>
+    <h1 align="center">JVClient</h1>
+    <h2 align="center">Un client Node.js pour <a href="https://www.jeuxvideo.com">jeuxvideo.com</a></h2>
+    <p align="center">
+        <img src="../static/icon-512x512.png" width="50%"></img>
+    </p>
+</div>
 
 **JVClient** est une librairie pour [Node.js](https://nodejs.org/en) qui permet d'interagir avec le site [jeuxvideo.com](https://www.jeuxvideo.com) et son API.
 
@@ -24,7 +29,7 @@ Cette librairie a été conçue pour répondre à deux besoins :
 
 Dès que j'ai connu JVC en septembre 2022, j'ai cherché à développé des utilitaires autour de ce site.
 
-En me rendant sur la page JVFlux titrée « [documentation de l'API de jeuxvideo.com](https://jvflux.fr/Documentation_de_l%27API_Jeuxvideo.com) », j'ai appris que JVC possédait une API (l'API V4) qui malheureusement n'était alors pas documentée. C'est grâce à un travail de rétro-ingéniérie, effectué par *ChristianRonald* et moi-même, que le recensement des *endpoints* de l'API a pu être effectué ; c'est également grâce à *edwado* qui avait auparavant codé une classe PHP pour générer le header `Jvc-Authorization`, condition d'accès à l'API V4. Sans ces deux forumeurs, la présente librairie n'aurait pu voir le jour.
+En me rendant sur la page JVFlux titrée « [documentation de l'API de jeuxvideo.com](https://jvflux.fr/Documentation_de_l%27API_Jeuxvideo.com) », j'ai appris que JVC possédait une API (l'API v4) qui malheureusement n'était alors pas documentée. C'est grâce à un travail de rétro-ingéniérie, effectué par *ChristianRonald* et moi-même, que le recensement des *endpoints* de l'API a pu être effectué ; c'est également grâce à *edwado* qui avait auparavant codé une classe PHP pour générer le header `Jvc-Authorization`, condition d'accès à l'API v4. Sans ces deux forumeurs, la présente librairie n'aurait pu voir le jour.
 
 ### Contact
 Pour toute question, je suis joignable sur Discord sous le pseudo `contrapunctus_1`.
