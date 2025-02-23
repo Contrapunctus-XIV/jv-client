@@ -1,6 +1,6 @@
 {
   "name": "jv-client",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,6 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/Contrapunctus-XIV/jv-client.git"
   },
+  "keywords": ["JVC", "www.jeuxvideo.com", "jeuxvideo.com", "18-25"],
   "dependencies": {
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.0.0",
