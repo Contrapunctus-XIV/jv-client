@@ -1,10 +1,11 @@
 {
   "name": "jv-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
+    "test": "exit 0",
     "build": "tsc",
     "docs": "typedoc lib/**/* lib/index.ts --name API --readme lib/index.md --json api.json & rimraf docs & typedoc --entryPointStrategy merge api.json --alwaysCreateEntryPointModule --projectDocuments guides/quickstart.md --projectDocuments guides/scraping.md --projectDocuments guides/interact.md & rimraf api.json"
   },
@@ -14,6 +15,10 @@
   "type": "module",
   "author": "Contrapunctus",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Contrapunctus-XIV/jv-client.git"
+  },
   "dependencies": {
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.0.0",
