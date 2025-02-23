@@ -1,0 +1,11 @@
+{
+  "name": "JVClient",
+  "out": "./docs",
+  "entryPoints": ["lib/index.ts", "lib/errors.ts"],
+  //"projectDocuments": ["guides/interact.md", "guides/scraping.md"],
+  "exclude": ["lib/requests.ts", "lib/vars.ts"],
+  "plugin": ["typedoc-plugin-merge-modules", "typedoc-plugin-mdn-links"],
+  "mergeModulesMergeMode": "module",
+  "searchInComments": true,
+  "searchInDocuments": true,
+}
