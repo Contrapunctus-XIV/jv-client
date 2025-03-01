@@ -11,7 +11,7 @@ Vous devez disposer des logiciels suivants :
 - [cURL](https://curl.se/docs/manpage.html), version `8.10.1` ou plus
 
 > [!IMPORTANT]
-> Il est **vivement conseillé** d'avoir installé et activé [**Cloudflare WARP**](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/download-warp/) sur la machine avant d'utiliser la librairie. En effet, il arrive (ce n'est pas systématique) que la protection Cloudflare de jeuxvideo.com bloque les requêtes venant de JavaScript en renvoyant des erreurs `403`. WARP agit comme un proxy qui fait passer les requêtes par le réseau Cloudflare, inscrit sur la *whitelist* de la protection anti-bot.
+> Il est **vivement conseillé** d'avoir installé et activé [**Cloudflare WARP**](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/download-warp/) sur la machine avant d'utiliser la librairie. En effet, il arrive (ce n'est pas systématique) que la protection Cloudflare de jeuxvideo.com bloque toutes les requêtes provenant d'une machine tant que le challenge n'est pas résolu par l'utilisateur, en renvoyant des erreurs `403`. WARP agit comme un proxy qui fait passer les requêtes par le réseau Cloudflare, inscrit sur la *whitelist* de la protection anti-bot.
 
 ## Commande d'installation
 Dans le terminal exécutez la commande :
