@@ -167,11 +167,13 @@ export default abstract class JVCode {
 
     /**
      * Convertit du JVCode en HTML par une requête au site JVC.
-     *
+     * @hidden
+     * @deprecated
      * @param {string} markup chaîne de caractères JVCode
      * @returns  {Promise<string>}
      */
     public static async jvCodeToHtml(markup: string): Promise<string> {
+        throw new Error("This method is deprecated since v0.2.0.");
         const response = await curl(JVCODE_URL, { method: "POST", data: { texte: markup }, headers: { "Content-Type": "application/x-www-form-urlencoded" } });
         return await response.text();
     }
