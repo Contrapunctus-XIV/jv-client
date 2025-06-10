@@ -27,3 +27,4 @@ title: Notes de version
     * Modification de la fonction `curl` (dans `requests.ts`) afin de prendre en charge l'encodage `multipart/form-data` nécessaire à l'envoi du nouveau formulaire de post
     * Mise à jour des variables dans `vars.ts`
     * `undici 6.21.1` --> `undici 6.21.3` (mise à jour de sécurité)
+- **v0.2.1** : modifications mineures de la documentation
