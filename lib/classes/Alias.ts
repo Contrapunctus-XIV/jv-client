@@ -206,7 +206,7 @@ export default class Alias {
 
     /**
      * Renvoie l'ID du compte. Nécessite un client connecté.
-     * 
+     *
      * @param {Client} client instance connectée de `Client`
      * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
      * @throws {@link errors.InexistentContent | NotConnected} si le client fourni n'est pas connecté
@@ -215,22 +215,33 @@ export default class Alias {
     async getID(client: Client): Promise<number | undefined> {
         client.assertConnected();
 
-        const response = await curl(this._url);
+        const response = await curl(this._url, { cookies: client.session });
 
         this._rejectIfInexistent(response);
+        let url;
 
         const $ = load(await response.text());
-        const reportSpan = $(SELECTORS["account-report"]);
-        if (reportSpan.length < 1) {
-            return undefined;
+        decodeAllJvCares($);
+
+        const reportSpan = $(SELECTORS["accountReport"]);
+        if (reportSpan.length >= 1) {
+            const reportUrl = reportSpan.attr("data-selector");
+            if (reportUrl) {
+                url = reportUrl;
+            }
         }
         
-        const reportUrl = reportSpan.attr("data-selector");
-        if (!reportUrl) {
-            return undefined;
+        if (!url) {
+            const editButton = $(SELECTORS["editProfile"]);
+            const editUrl = editButton.attr("href");
+            if (!editUrl) {
+                return undefined;
+            }
+
+            url = editUrl;
         }
 
-        const urlParams = new URLSearchParams(reportUrl.split('?')[1]);
+        const urlParams = new URLSearchParams(url!.split('?')[1]);
         const id = urlParams.get("id");
         
         return id ? parseInt(id) : undefined;
