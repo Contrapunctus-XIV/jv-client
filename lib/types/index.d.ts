@@ -1114,4 +1114,45 @@ declare namespace JVCTypes {
             raw?: boolean;
         }
     }
+
+    interface FormData {
+        isUserConnected: boolean;
+        redirectLoginUrl: string;
+        topicId: number;
+        forumId: number;
+        messageEditor: {
+            messageInfo: {
+                label: string;
+                text: string;
+                url: string;
+            };
+            inputName: string;
+            initialText: string;
+            placeholder: string;
+            initialEnabledPreview: boolean;
+            options: {
+                maxRenderedStickers: boolean;
+                isRenderedStickers: boolean;
+                isRenderedNoelShack: boolean;
+                isOpenedSpoils: boolean;
+                isRenderedVideo: boolean;
+            };
+            userListGroups: {
+                inputName: string;
+                values: number[];
+                defaultValue: number;
+            };
+            ajaxSessionContentEditToken: string;
+        };
+        formSession: {
+            fs_session: string;
+            fs_timestamp: number;
+            fs_version: string;
+            [k as string]: string;
+        };
+        ajaxToken: string;
+        locales: {
+            errors: string;
+        };
+    }
 }
