@@ -28,3 +28,4 @@ title: Notes de version
     * Mise à jour des variables dans `vars.ts`
     * `undici 6.21.1` --> `undici 6.21.3` (mise à jour de sécurité)
 - **v0.2.1** : modifications mineures de la documentation
+- **v0.2.2** : modifications mineures de la documentation
