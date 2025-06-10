@@ -46,17 +46,16 @@ export default class Forum {
             while (end ? currentPage <= end : true) {
                 const forumUrl = self.setUrlPage(currentPage, url);
                 const response = await curl(forumUrl, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
-
+                
                 self._rejectIfInexistent(response);
 
                 const $ = load(await response.text());
                 const parsedTopics = Forum.parseTopics($, raw);
+                yield parsedTopics as JVCTypes.Forum.Topic[] | Topic[];
 
                 if ($(TOPIC_FEED_SELECTORS["nav"]).attr("href") === "") { // si plus de topics après cette page
                     break;
                 }
-
-                yield parsedTopics as JVCTypes.Forum.Topic[] | Topic[];
                 currentPage += step;
                 //await sleep(DELAY);
             }
@@ -110,7 +109,7 @@ export default class Forum {
      */
     private setUrlPage(page: number, url: string = ""): string {
         const arr = url.length === 0 ? this._url.split("-") : url.split("-");
-        arr[5] = (page * TOPICS_PER_PAGE + 1).toString();
+        arr[5] = ((page-1) * TOPICS_PER_PAGE + 1).toString();
         return arr.join("-");
     }
 
@@ -135,7 +134,7 @@ export default class Forum {
         this._rejectIfInexistent(response);
 
         const $ = load(await response.text());
-        return $(TOPIC_FEED_SELECTORS["forum-title"]).text().trim();
+        return $(TOPIC_FEED_SELECTORS["forumTitle"]).text().trim();
     }
 
     /**
@@ -188,7 +187,8 @@ export default class Forum {
     private static parseTopics($: cheerio.Root, raw: true): JVCTypes.Forum.Topic[];
     private static parseTopics($: cheerio.Root, raw?: boolean): Topic[];
     private static parseTopics($: cheerio.Root, raw: boolean = false): Topic[] | JVCTypes.Forum.Topic[] {
-        const topics = $(SELECTORS["topic-item"]);
+        const topics = $(SELECTORS["topicItem"]);
+        
         const parsedTopics = topics.get().map((x, i): Topic | JVCTypes.Forum.Topic => {
             const el = $(x);
             const url = `https://${DOMAIN}${el.attr("href")!}`;
@@ -214,7 +214,7 @@ export default class Forum {
                 icon
             };
         });
-
+        
         return parsedTopics as Topic[] | JVCTypes.Forum.Topic[];
     }
 
@@ -330,7 +330,8 @@ export default class Forum {
         const self = this;
 
         return (async function* () {
-            yield* self.generator(self._api_url, paging, { raw, query });
+            const url = await urlPromise;
+            yield* self.generator(url, paging, { raw, query });
         })();
     }
 
