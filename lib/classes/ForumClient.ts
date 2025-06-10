@@ -6,7 +6,7 @@ import { curl } from "../requests.js";
 import { load } from "cheerio";
 import Client from "./Client.js";
 import Forum from "./Forum.js";
-import { DEFAULT_UP_DELAY, MINIMAL_UP_DELAY, POST_MODERATION_URL, RESOLVE_TOPIC_URL, SECOND_DELAY, SELECTORS, TOPIC_MODERATION_URL } from "../vars.js";
+import { DEFAULT_UP_DELAY, FORUMS_APP_REGEX, MINIMAL_UP_DELAY, POST_MODERATION_URL, POST_URL, RESOLVE_TOPIC_URL, SECOND_DELAY, SELECTORS, TOPIC_MODERATION_URL, TOPIC_POST_URL } from "../vars.js";
 import { JvcErrorMessage } from "../errors.js";
 import Topic from "./Topic.js";
 import Post from "./Post.js";
@@ -33,19 +33,24 @@ export default class ForumClient {
      *
      * @hidden
      * @private
-     * @param {cheerio.Root} $
+     * @param {Response} response
      */
-    private static detectJvcErrors($: cheerio.Root): void {
-        const alert = $(SELECTORS["alert"]);
+    private static async detectJvcErrors(response: Response): Promise<void> {
+        try {
+            const data = await response.json();
+            if (data.errors) {
+                let errors = [""];
+                for (const [_, err] of Object.entries(data.errors)) {
+                    errors.push(err as string);
+                }
+                throw new JvcErrorMessage(errors.join(" "));
+            } 
+        } catch (e) {
+            if (e instanceof SyntaxError) {
 
-        if (alert.length > 0) {
-            throw new JvcErrorMessage(alert.text().trim());
-        }
-
-        const warning = $(SELECTORS["warning"]);
-
-        if (warning.length > 0) {
-            throw new JvcErrorMessage(warning.text().trim());
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -67,26 +72,52 @@ export default class ForumClient {
         this._client.assertConnected();
 
         const inputsRes = await curl(forum.url, { cookies: this._client.session });
-        const $ = load(await inputsRes.text());
-        const inputs = $(SELECTORS["forum-inputs"]);
-        const data: Record<string, string | string[]> = Object.fromEntries(inputs.get().map((x) => [$(x).attr("name")!, $(x).attr("value")!]));
-        
-        data["g-recaptcha-response"] = "";
-        data["form_alias_rang"] = "1";
-        data["titre_topic"] = title;
-        data["message_topic"] = body;
+        const preData = (await this.getFormData(inputsRes))!;
+        const data = {
+            topicTitle: title,
+            submitSurvey: false,
+            answerSurvey: "",
+            "responsesSurvey[]": [""],
+            text: body,
+            topicId: 0,
+            forumId: preData.forumId,
+            group: 1,
+            messageId: "undefined",
+            ...preData.formSession,
+            ajax_hash: preData.ajaxToken
+        };
 
         if (poll) {
-            data["question_sondage"] = poll.title;
-            data["reponse_sondage[]"] = poll.answers;
-            data["submit_sondage"] = "1";
+            data.submitSurvey = true;
+            data.answerSurvey = poll.title;
+            data["responsesSurvey[]"] = poll.answers;
         }
 
-        const response = await curl(inputsRes.url, { method: "POST", cookies: this._client.session, data, headers: { "content-type": "application/x-www-form-urlencoded" } });
-        const $2 = load(await response.text());
-        ForumClient.detectJvcErrors($2);
+        const response = await curl(TOPIC_POST_URL, { method: "POST", cookies: this._client.session, data, headers: { "content-type": "multipart/form-data" } });
+        const responseClone = response.clone()
+        await ForumClient.detectJvcErrors(response);
 
-        return new Topic(Topic._getIdFromUrl(response.url));
+        const redirectUrl = (await responseClone.json()).redirectUrl;
+        return new Topic(Topic._getIdFromUrl(redirectUrl));
+    }
+
+    /**
+     * @hidden
+     * @param res 
+     * @returns 
+     */
+    private async getFormData(res: Response): Promise<JVCTypes.FormData | undefined> {
+        const $ = load(await res.text());
+        const script = $(SELECTORS["forumsApp"]);
+        const match = script!.html()!.match(FORUMS_APP_REGEX);
+
+        if (match && match[1]) {
+            const decodedBuffer = Buffer.from(match[1], "base64");
+            const decodedString = decodedBuffer.toString("utf-8");
+            return JSON.parse(decodedString);
+        };
+
+        return undefined;
     }
 
     /**
@@ -103,17 +134,19 @@ export default class ForumClient {
         this._client.assertConnected();
 
         const inputsRes = await curl(topic.url, { cookies: this._client.session });
-        const $ = load(await inputsRes.text());
-        const inputs = $(SELECTORS["forum-inputs"]);
-        const data: Record<string, string | string[]> = Object.fromEntries(inputs.get().map((x) => [$(x).attr("name")!, $(x).attr("value")!]));
-        
-        data["g-recaptcha-response"] = "";
-        data["form_alias_rang"] = "1";
-        data["message_topic"] = text;
+        const preData = (await this.getFormData(inputsRes))!;
+        const data = {
+            text,
+            topicId: preData.topicId,
+            forumId: preData.forumId,
+            group: 1,
+            ...preData.formSession,
+            ajax_hash: preData.ajaxToken,
+            messageId: "undefined"
+        };
 
-        const response = await curl(inputsRes.url, { method: "POST", cookies: this._client.session, data, headers: { "content-type": "application/x-www-form-urlencoded" } });
-        const $2 = load(await response.text());
-        ForumClient.detectJvcErrors($2);
+        const response = await curl(POST_URL, { method: "POST", cookies: this._client.session, data, headers: { "Content-Type": "multipart/form-data" } });
+        await ForumClient.detectJvcErrors(response);
 
         const postId = parseInt(response.url.split("_").pop()!);
         return new Post(postId);
