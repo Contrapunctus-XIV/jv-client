@@ -220,19 +220,25 @@ const PARSE_RESULT_ATTRS: Parsers = {
     "url": (str: string) => str.trim()
 };
 
-function convertRequestIntoCurl(request: Request, { body = undefined }: { body?: string } = {}): string {
+function convertRequestIntoCurl(request: Request, { body = undefined }: { body?: string | FormData } = {}): string {
     let command = `echo ${CURL_SCHEME["body"][0]} & `;
     // -X : méthode, -L : suivre redirections, -A : User-Agent, -s : pas de barre de progression
     command += `curl -s -X "${request.method}" -L "${request.url}" -A "${USER_AGENT}"`;
 
+    if (!["GET", "HEAD"].includes(request.method) && body) {
+        // -d : body (str)
+        if (body instanceof FormData) {
+            for (const [k,v] of body.entries()) {
+                command += ` -F "${k}=${v}"`;
+            }
+        } else {
+            command += ` -d "${body}"`;
+        }
+    }
+
     for (const [key, value] of request.headers.entries()) {
         // -H : header
         command += ` -H "${key}: ${value}"`;
-    }
-
-    if (!["GET", "HEAD"].includes(request.method) && body) {
-        // -d : body (str)
-        command += ` -d "${body}"`;
     }
 
     // ajout de l'option "Write out" pour formater la réponse obtenue
@@ -277,6 +283,22 @@ function convertCurlIntoResponse(stdout: string): Response {
     return response;
 }
 
+function convertObjToFormData(data: Record<string,any>): FormData {
+    const formData = new FormData();
+
+    for (const [k,v] of Object.entries(data)) {
+        if (v instanceof Array) {
+            for (const el of v) {
+                formData.append(k, el);
+            }
+        } else {
+            formData.append(k, v.toString());
+        }
+    }
+
+    return formData;
+}
+
 export async function curl(url: string, { method = "GET", query = {}, headers = {}, data = undefined, cookies = {}, allowedStatusErrors = [HTTP_CODES.BAD_REQUEST, HTTP_CODES.NOT_FOUND] }: CallOptions = {}): Promise<Response> {
     headers = normalizeHeaders(headers);
 
@@ -291,14 +313,17 @@ export async function curl(url: string, { method = "GET", query = {}, headers = 
         urlWithParams.search = new URLSearchParams(query).toString();
     }
 
-    let parsedData: string | undefined = undefined;
+    let parsedData: string | FormData | undefined = undefined;
 
     if (!['GET', 'HEAD'].includes(method.toUpperCase())) {
         if (reqHeaders.get('Content-Type') === 'application/json') {
             parsedData = JSON.stringify(data);
         } else if (reqHeaders.get('Content-Type') === 'application/x-www-form-urlencoded') {
             parsedData = buildDataAsParams(data);
-        } else {
+        } else if (reqHeaders.get('Content-Type') === "multipart/form-data") {
+            parsedData = convertObjToFormData(data);
+        }
+        else {
             parsedData = data;
         }
     }
@@ -309,7 +334,6 @@ export async function curl(url: string, { method = "GET", query = {}, headers = 
     });
 
     const command = convertRequestIntoCurl(request, { body: parsedData });
-
     let response: Response;
     let retries = 0;
 

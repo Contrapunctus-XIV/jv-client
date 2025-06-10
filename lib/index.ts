@@ -6,7 +6,6 @@ import Game from "./classes/Game.js";
 import Account from "./classes/Account.js";
 import V4 from "./scrapers/V4.js";
 import ContentComment from "./classes/ContentComment.js";
-import GG from "./scrapers/GG.js";
 import V4Client from "./classes/V4Client.js";
 import Review from "./classes/Review.js";
 import Topic from "./classes/Topic.js";
@@ -14,7 +13,6 @@ import JVCode from "./scrapers/JVCode.js";
 import Post from "./classes/Post.js";
 import ForumClient from "./classes/ForumClient.js";
 import Alias from "./classes/Alias.js";
-import Config from "./classes/Config.js";
 import { convertJVCStringToDate, decodeJvCare, isValidJVCText } from "./utils.js";
 
 /**
