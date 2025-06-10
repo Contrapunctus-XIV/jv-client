@@ -69,7 +69,6 @@ Le constructeur de la classe `Post` prend en argument l'ID du message.
 #### Classe statique `JVCode`
 
 - {@link scrapers.JVCode.htmlToJVCode | `JVCode.htmlToJVCode`} renvoie une chaîne de caractères contenant la syntaxe JVCode qui est à l'origine du code HTML passé en entrée
-- {@link scrapers.JVCode.jvCodeToHtml | `JVCode.jvCodeToHtml`} renvoie le rendu HTML d'un texte JVCode
 
 ### Exemples
 
