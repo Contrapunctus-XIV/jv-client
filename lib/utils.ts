@@ -86,6 +86,8 @@ export function isValidJVCText(text: string, { minimumLength = 3, checkForInvali
 export function convertJVCStringToDate(dateString: string): Date | undefined {
     const regexWithTime = /(\d{2}) ([\p{L}']+) (\d{4}) à (\d{2}):(\d{2}):(\d{2})/u;
     const regexWithoutTime = /(\d{2}) ([\p{L}']+) (\d{4})/u;
+    const otherRegexWithoutTime = /(\d{2})\/(\d{2})\/(\d{4})/u;
+    const regexWithoutDate = /(\d{2}):(\d{2}):(\d{2})/u;
 
     let match = dateString.match(regexWithTime);
     if (!match) {
@@ -96,11 +98,43 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
         const day = parseInt(match[1], 10);
         const month = FRENCH_MONTHS_TO_NUMBER[match[2] as keyof typeof FRENCH_MONTHS_TO_NUMBER];
         const year = parseInt(match[3], 10);
+        
         const hours = match[4] ? parseInt(match[4], 10) : 0;
         const minutes = match[5] ? parseInt(match[5], 10) : 0;
         const seconds = match[6] ? parseInt(match[6], 10) : 0;
 
         const dateUTC = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+
+        const options = { timeZone: 'Europe/Paris' };
+        const frenchDate = new Date(dateUTC.toLocaleString('en-US', options));
+
+        return frenchDate;
+    }
+
+    match = dateString.match(otherRegexWithoutTime);
+
+    if (match) {
+        const day = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const year = parseInt(match[3], 10);
+
+        const dateUTC = new Date(Date.UTC(year, month, day, 0, 0, 0));
+
+        const options = { timeZone: 'Europe/Paris' };
+        const frenchDate = new Date(dateUTC.toLocaleString('en-US', options));
+
+        return frenchDate;
+    }
+
+    match = dateString.match(regexWithoutDate);
+
+    if (match) {
+        const now = new Date();
+        const hours = parseInt(match[0]);
+        const minutes = parseInt(match[1]);
+        const seconds = parseInt(match[2]);
+
+        const dateUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds))
 
         const options = { timeZone: 'Europe/Paris' };
         const frenchDate = new Date(dateUTC.toLocaleString('en-US', options));
@@ -139,7 +173,7 @@ export function decodeJvCare(elementClass: string): string {
  */
 export function decodeAllJvCares($: cheerio.Root): cheerio.Root {
     $(SELECTORS["jvCare"])
-        .each((index: number, element: cheerio.Element) => {
+        .each((_: number, element: cheerio.Element) => {
             const className = $(element).attr('class');
             if (className) {
                 const link = decodeJvCare(className);
