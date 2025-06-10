@@ -8,7 +8,8 @@
 
 **JVClient** est une librairie pour [Node.js](https://nodejs.org/en) qui permet d'interagir avec le site [jeuxvideo.com](https://www.jeuxvideo.com) et son API.
 
-La documentation complète est trouvable [ici](https://contrapunctus-xiv.github.io/jv-client/).
+> [!NOTE]
+> La documentation complète de la librairie est trouvable [à cette adresse](https://contrapunctus-xiv.github.io/jv-client/).
 
 ### Motivations
 Cette librairie a été conçue pour répondre à deux besoins :
