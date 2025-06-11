@@ -10,6 +10,7 @@ import { load } from "cheerio";
 import { checkInteger, convertJVCStringToDate, sleep } from "../utils.js";
 import JVCode from "../scrapers/JVCode.js";
 import Post from "./Post.js";
+import { JVCTypes, V4Types } from "../types/index.js";
 
 /**
  * Représente un topic.

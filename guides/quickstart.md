@@ -28,3 +28,6 @@ import jv from "jv-client";
 ```
 
 Les classes et fonctions exportées par la librairie sont documentées {@link index.JVClient | ici}.
+
+> [!NOTE]
+> Je vous recommande d'utiliser la librairie avec [TypeScript](https://www.typescriptlang.org/) (JavaScript avec le typage en plus) afin de bénéficier des annotations de types qui sont incluses avec.

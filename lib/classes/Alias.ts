@@ -9,6 +9,7 @@ import { CDV_URL, HTTP_CODES, SELECTORS } from "../vars.js";
 import Client from "./Client.js";
 import { convertJVCStringToDate, decodeAllJvCares } from "../utils.js";
 import Account from "./Account.js";
+import { JVCTypes } from "../types/index.js";
 
 /**
  * Objet associant aux attributs de la CDV les fonctions permettant de les récupérer. 

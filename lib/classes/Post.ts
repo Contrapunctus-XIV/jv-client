@@ -10,6 +10,7 @@ import { checkInteger, convertJVCStringToDate } from "../utils.js";
 import JVCode from "../scrapers/JVCode.js";
 import Topic from "./Topic.js";
 import Client from "./Client.js";
+import { JVCTypes } from "../types/index.js";
 
 /**
  * Classe représentant un message sur un {@link Topic}. Utilise le site JVC.

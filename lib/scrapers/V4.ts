@@ -6,6 +6,7 @@ import { callApi } from "../requests.js";
 import Content, { Video } from "../classes/Content.js";
 import Game from "../classes/Game.js";
 import { DEFAULT_PER_PAGE } from "../vars.js";
+import { V4Types } from "../types/index.js";
 
 function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true, type: "video" }): AsyncGenerator<V4Types.Videos.Raw, void, unknown>;
 function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true, type: "game" }): AsyncGenerator<V4Types.Games.Raw, void, unknown>;

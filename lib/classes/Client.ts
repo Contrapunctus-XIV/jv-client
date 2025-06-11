@@ -7,6 +7,7 @@ import { callApi } from "../requests.js";
 import { sleep } from "../utils.js";
 import { CONNECTION_DELAY, HTTP_CODES } from "../vars.js";
 import Account from "./Account.js";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe représentant une connexion à un compte JVC.

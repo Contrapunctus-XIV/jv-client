@@ -7,6 +7,7 @@ import { InexistentContent } from "../errors.js";
 import { callApi } from "../requests.js";
 import { uniformize_string } from "../utils.js";
 import { writeFile } from "fs";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe permettant des opérations avec le fichier Config obtenu à l'endpoint general/config.

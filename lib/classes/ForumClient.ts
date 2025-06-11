@@ -11,6 +11,7 @@ import { JvcErrorMessage } from "../errors.js";
 import Topic from "./Topic.js";
 import Post from "./Post.js";
 import { sleep } from "../utils.js";
+import { JVCTypes } from "../types/index.js";
 
 /**
  * Classe permettant à l'aide d'un {@link Client} connecté d'interagir avec les forums de JVC.

@@ -8,6 +8,7 @@ import Content, { Video } from "./Content.js";
 import Review from "./Review.js";
 import { DEFAULT_PER_PAGE, HTTP_CODES } from "../vars.js";
 import { checkInteger } from "../utils.js";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe représentant un jeu vidéo. Utilise l'API v4.

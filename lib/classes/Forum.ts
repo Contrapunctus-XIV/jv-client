@@ -8,6 +8,7 @@ import { load } from "cheerio";
 import { checkInteger, convertJVCStringToDate, sleep } from "../utils.js";
 import Topic from "./Topic.js";
 import { InexistentContent } from "../errors.js";
+import { JVCTypes } from "../types/index.js";
 
 /**
  * Classe représentant un forum. Utilise le site JVC.

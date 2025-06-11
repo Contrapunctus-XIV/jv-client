@@ -12,6 +12,7 @@ import { JvcErrorMessage } from "../errors.js";
 import Post from "./Post.js";
 import { CDV_POSTS_URL, SELECTORS } from "../vars.js";
 import { load } from "cheerio";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe permettant des opérations sur le profil public d'un compte JVC. Utilise l'API v4 et nécessite un {@link Client} connecté.

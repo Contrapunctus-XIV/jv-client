@@ -7,7 +7,7 @@ import { callApi } from "../requests.js";
 import { checkInteger } from "../utils.js";
 import { HTTP_CODES } from "../vars.js";
 import Game from "./Game.js";
-
+import { V4Types } from "../types/index.js";
 /**
  * Classe représentant un avis utilisateur sur un jeu ({@link Game}).
  *

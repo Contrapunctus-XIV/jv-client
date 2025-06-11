@@ -19,7 +19,6 @@ title: Notes de version
 - **v0.2.0** : correctif suivant la mise à jour de JVC de mai 2025, corrections de bogues, ajout de la page *Notes de version* à la documentation
     * Adaptation de {@link classes.ForumClient.postTopic | `ForumClient.postTopic`} au nouveau formulaire de post de topics
     * Adaptation de {@link classes.ForumClient.postTopic | `ForumClient.postMessage`} au nouveau formulaire de post de messages
-    * Ajout de l'interface {@link types.JVCTypes.FormData | `JVCTypes.FormData`} qui correspond à ce nouveau formulaire
     * Correction d'une erreur dans la classe {@link classes.Forum | `Forum`} qui empêchait d'accéder aux résultats de la première page (pour {@link classes.Forum.readTopics | `Forum.readTopics`} et {@link classes.Forum.searchTopics | `ForumClient.searchTopics`})
     * Correction d'une erreur dans la fonction {@link classes.Alias.getID | `Alias.getID`} qui empêchait de renvoyer l'ID du compte si le client fourni était connecté à ce dernier
     * Correction de la fonction {@link utils.convertJVCStringToDate | `utils.convertJVCStringToDate`} qui renvoyait `undefined` pour certains formats de date non gérés
@@ -29,3 +28,4 @@ title: Notes de version
     * `undici 6.21.1` --> `undici 6.21.3` (mise à jour de sécurité)
 - **v0.2.1** : modifications mineures de la documentation
 - **v0.2.2** : modifications mineures de la documentation
+- **v0.2.3** : correction d'une erreur dans la structure de la librairie qui empêchait l'utilisateur de bénéficier de son typage, modifications mineures de la documentation

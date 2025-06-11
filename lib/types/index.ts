@@ -1,3 +1,9 @@
+import Forum from "../classes/Forum.js";
+import Content, { Video } from "../classes/Content.js";
+import Game from "../classes/Game.js";
+import Review from "../classes/Review.js";
+import Topic from "../classes/Topic.js";
+
 declare namespace V4Types {
     /**
      * @hidden
@@ -669,285 +675,6 @@ declare namespace V4Types {
     }
 }
 
-/**
- * @hidden
- */
-declare namespace GGTypes {
-    type RawTypes = GGTypes.Folder.Infos | GGTypes.Video.Infos | GGTypes.Game.Infos | GGTypes.News.Infos | GGTypes.Preview.Infos | GGTypes.Review.Infos;
-
-    interface Raw<T extends RawTypes> {
-        data: {
-            items: T[];
-        };
-        itemCount: number;
-    }
-
-    interface Option {
-        value: string;
-        label: string;
-        itemCount: number;
-        urlPath: string;
-        isObfuscated: number;
-    }
-    
-    interface Query<K extends string> {
-        key: K;
-        noSelectionItemCount: string;
-        noSelectionUrlPath: string;
-        options: Option[];
-    }
-
-    namespace Content {
-        interface Infos {
-            publicationId: number;
-            datePublished: string;
-            urlPath: string;
-            description?: string | null;
-            title: string;
-            coverImageUrlBySize: {
-                origin: string;
-                xs: string;
-                ms: string;
-                md: string;
-                lg: string;
-            };
-            platforms?: string[];
-        }
-    }
-
-    namespace Game {
-        type Query = [GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"gameMode">];
-
-        interface Infos {
-            gameId: number;
-            title: string;
-            coverImageUrlBySize: {
-                origin: string;
-                xs: string;
-                ms: string;
-                md: string;
-                lg: string;
-            };
-            platforms: string[];
-            description: string;
-            franceRelease: {
-                datePeriod: {
-                    date: string;
-                    precision: string;
-                };
-                isCancelled: boolean;
-            } | null;
-            urlPath: string;
-            bestReview: {
-                editorialRatingDisplay: string;
-                editorialRating: number;
-                platforms: string[];
-                urlPath: string;
-            } | null;
-            videos: {
-                showCasedVideo: {
-                    urlPath: string;
-                    displayType: string;
-                };
-                count: number;
-                hubUrlPath: string;
-                singleVideoUrlPath: string | null;
-            };
-            forumUrlPath: string;
-            userRating: {
-                averagePlatformRating: number;
-                platform: string;
-                urlPath: string;
-            };
-            newUserOpinionUrlPath: string;
-            storeUrlPath: string | null;
-        }
-    }
-
-    namespace Games {
-        type Raw = GGTypes.Raw<GGTypes.Game.Infos>;
-    }
-
-    namespace News {
-        type Query = [GGTypes.Query<"publicationType">, GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"event">, GGTypes.Query<"publicationPeriod">];
-
-        interface Infos extends GGTypes.Content.Infos {
-            isSponsored: boolean;
-            publicationTypeId: string;
-            typeTitle: string;
-            commentsCount: number;
-        }
-
-        type Raw = GGTypes.Raw<GGTypes.News.Infos>;
-    }
-
-    namespace Review {
-        type Query = [GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"gameMode">, GGTypes.Query<"editorialRatingRange">, GGTypes.Query<"maxAge">];
-        
-        interface Infos extends GGTypes.Content.Infos {
-            editorialRating: string;
-            gameTitle: string;
-            gameUrlPath: string;
-            gamePlatforms: string;
-        }
-    }
-
-    namespace Reviews {
-        type Raw = GGTypes.Raw<GGTypes.Review.Infos>;
-    }
-
-    namespace Preview {
-        type Query = [GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"event">];
-        
-        interface Infos extends GGTypes.Content.Infos {
-            editorialFeeling: number;
-            gameTitle: string;
-            gameUrlPath: string;
-            gamePlatforms: string[];
-            commentsCount: number;
-        }
-    }
-
-    namespace Previews {
-        type Raw = GGTypes.Raw<GGTypes.Preview.Infos>;
-    }
-
-    namespace Video {
-        type Query = [GGTypes.Query<"publicationType">, GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"event">];
-        
-        interface Infos extends GGTypes.Content.Infos {
-            isSponsored: boolean;
-            publicationTypeId: string;
-            respawnIdMedia: number;
-            typeTitle: string;
-            externalId: number | null;
-            durationMs: number;
-            viewCount: number;
-        }
-    }
-
-    namespace Videos {
-        type Raw = GGTypes.Raw<GGTypes.Video.Infos>;
-    }
-
-    namespace Folder {
-        type Query = [GGTypes.Query<"platform">, GGTypes.Query<"gameGenre">, GGTypes.Query<"event">];
-
-        interface Infos extends GGTypes.Content.Infos {
-            isSponsored: boolean;
-            typeTitle: string;
-            commentsCount: number;
-        }
-    }
-
-    namespace Folders {
-        type Raw = GGTypes.Raw<GGTypes.Folder.Infos>;
-    }
-
-    namespace Request {
-        interface Paging {
-            begin?: number;
-            end?: number | null;
-            step?: number;
-        }
-
-        interface RequestOptions {
-            query?: Record<string, any>;
-            raw?: boolean;
-            type?: "news" | "game" | "review" | "preview" | "video" | "folder";
-        }
-
-        type Options =
-        | { paging?: never; page: number; raw?: boolean; perPage?: number; }
-        | { page?: never; paging?: Paging; raw?: boolean; perPage?: number; };
-
-        namespace Games {
-            interface Query {
-                platform?: string;
-                gameGenre?: string;
-                gameMode?: string;
-            }
-
-            type Sort = "popularity" | "editorialRating" | "releaseDate" | "title";
-            type Preset = "all" | "awaited" | "popular" | "best" | "currentBest" | "releases";
-
-            type Options = GGTypes.Request.Options & {
-                preset?: Preset;
-                sort?: Sort;
-                query?: Query;
-            }
-        }
-
-        namespace News {
-            interface Query {
-                publicationType?: string;
-                platform?: string;
-                gameGenre?: string;
-                event?: string;
-                publicationPeriod?: string;
-            }
-
-            type Options = GGTypes.Request.Options & {
-                query?: Query;
-            }
-        }
-        
-        namespace Reviews {
-            type Sort = "datePublished" | "editorialRating" | "gameTitle";
-
-            type Query = {
-                platform?: string;
-                gameGenre?: string;
-                gameMode?: string;
-                editorialRatingRange?: string;
-                maxAge?: string;
-            }
-
-            type Options = GGTypes.Request.Options & {
-                sort?: Sort;
-                query?: Query;
-            }
-        }
-
-        namespace Previews {
-            type Query = {
-                platform?: string;
-                gameGenre?: string;
-                event?: string;
-            }
-
-            type Options = GGTypes.Request.Options & {
-                query?: Query;
-            }
-        }
-
-        namespace Videos {
-            type Query = {
-                publicationType?: string;
-                platform?: string;
-                gameGenre?: string;
-                event?: string;
-            }
-
-            type Options = GGTypes.Request.Options & {
-                query?: Query;
-            }
-        }
-
-        namespace Folders {
-            type Query = {
-                platform?: string;
-                gameGenre?: string;
-                event?: string;
-            }
-
-            type Options = GGTypes.Request.Options & {
-                query?: Query;
-            }
-        }
-    }
-}
-
 declare namespace JVCTypes {
     namespace Forum {
         interface Topic {
@@ -1115,6 +842,9 @@ declare namespace JVCTypes {
         }
     }
 
+    /**
+     * @hidden
+     */
     interface FormData {
         isUserConnected: boolean;
         redirectLoginUrl: string;
@@ -1148,7 +878,7 @@ declare namespace JVCTypes {
             fs_session: string;
             fs_timestamp: number;
             fs_version: string;
-            [k as string]: string;
+            [k: string]: string | number;
         };
         ajaxToken: string;
         locales: {
@@ -1156,3 +886,5 @@ declare namespace JVCTypes {
         };
     }
 }
+
+export { JVCTypes, V4Types };

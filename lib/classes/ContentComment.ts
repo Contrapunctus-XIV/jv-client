@@ -7,6 +7,7 @@ import { callApi } from "../requests.js";
 import { checkInteger } from "../utils.js";
 import { HTTP_CODES } from "../vars.js";
 import Content from "./Content.js";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe représentant un commentaire d'un utilisateur JVC posté sous un contenu (objet {@link Content}). Utilise l'API v4.

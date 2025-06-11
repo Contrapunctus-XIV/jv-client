@@ -10,6 +10,7 @@ import Content from "./Content.js";
 import ContentComment from "./ContentComment.js";
 import Game from "./Game.js";
 import Review from "./Review.js";
+import { V4Types } from "../types/index.js";
 
 /**
  * Classe permettant des interactions avec les contenus du site. Utilise l'API v4 et nécessite un {@link Client} connecté.
