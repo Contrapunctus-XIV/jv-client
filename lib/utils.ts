@@ -76,8 +76,7 @@ export function isValidJVCText(text: string, { minimumLength = 3, checkForInvali
 }
 
 /**
- * Renvoie une date correspondant à la chaîne de caractères passée en entrée, au format "01 janvier 2001 à 00:00:01" ou "01 janvier 2001", que l'on trouve
- * dans les forums de JVC en en-tête des messages.
+ * Renvoie une date correspondant à la chaîne de caractères passée en entrée, au format `01 janvier 2001 à 00:00:01`, `01 janvier 2001`, `01/01/2001` ou `00:00:01`, que l'on peut trouver un peu partout sur JVC.
  * Renvoie `undefined` si la chaîne de caractères ne correspond pas à une date valide.
  * 
  * @param {string} dateString la date
@@ -146,8 +145,8 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
 }
 
 /**
- * Renvoie un lien obtenu après décodage du JvCare passée en entrée.
- * Les JvCare sont un mécanisme d'obfusquation développé par JVC et destiné à masquer les liens situés sur une page HTML obtenue après une requête
+ * Renvoie un lien obtenu après décodage de la classe `JvCare` passée en entrée.
+ * Les `JvCare` sont un mécanisme d'obfusquation développé par JVC et destiné à masquer les liens situés sur une page HTML obtenue après une requête
  * effectuée avec une API comme `fetch`.
  * 
  * @example
@@ -169,9 +168,11 @@ export function decodeJvCare(elementClass: string): string {
 }
 
 /**
- * @hidden
+ * Déchiffre tous les JvCare dans le document `cheerio` passé en entrée.
+ * 
+ * @param {cheerio.Root} $ le document `cheerio`
  */
-export function decodeAllJvCares($: cheerio.Root): cheerio.Root {
+export function decodeAllJvCare($: cheerio.Root): cheerio.Root {
     $(SELECTORS["jvCare"])
         .each((_: number, element: cheerio.Element) => {
             const className = $(element).attr('class');
