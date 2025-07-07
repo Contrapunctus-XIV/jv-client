@@ -16,7 +16,7 @@ import { HTTP_CODES } from '../vars.js';
 import { V4Types } from '../types/index.js';
 
 /**
- * Une classe Account qui représente un compte dont l'ID est donnée en entrée. Utilise l'API v4 à la différence de {@link Alias} qui utilise le site JVC.
+ * Une classe Account qui représente un compte dont l'ID est donnée en entrée. Utilise l'API `v4` à la différence de {@link Alias} qui utilise le site JVC.
  * 
  */
 export default class Account {

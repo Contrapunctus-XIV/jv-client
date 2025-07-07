@@ -12,10 +12,10 @@ import { JvcErrorMessage } from "../errors.js";
 import Post from "./Post.js";
 import { CDV_POSTS_URL, SELECTORS } from "../vars.js";
 import { load } from "cheerio";
-import { V4Types } from "../types/index.js";
+import { JVCTypes, LibTypes, V4Types } from "../types/index.js";
 
 /**
- * Classe permettant des opérations sur le profil public d'un compte JVC. Utilise l'API v4 et nécessite un {@link Client} connecté.
+ * Classe permettant des opérations sur le profil public d'un compte JVC. Utilise l'API `v4` et nécessite un {@link Client} connecté.
  *
  */
 export default class Profile {
@@ -45,7 +45,7 @@ export default class Profile {
     /**
      * Renvoie la page de profil du compte.
      *
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<V4Types.Account.Infos>}
      */
     async getInfos(): Promise<V4Types.Account.Infos> {
@@ -60,7 +60,7 @@ export default class Profile {
     /**
      * Renvoie la page (contenus et reviews) du compte.
      *
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<V4Types.Account.Page.Raw>}
      */
     async getPage(): Promise<V4Types.Account.Page.Raw> {
@@ -85,7 +85,7 @@ export default class Profile {
      *
      * @param {{ raw?: boolean }} [options]
      * @param {boolean} [options.raw]  `true` pour renvoyer un objet JSON brut ({@link V4Types.Account.Favorites.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Account.Favorites.Default})
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {(Promise<V4Types.Account.Favorites.Default | V4Types.Account.Favorites.Raw>)}
      */
     async getFavorites(options?: { raw?: boolean }): Promise<V4Types.Account.Favorites.Default | V4Types.Account.Favorites.Raw>;
@@ -109,13 +109,13 @@ export default class Profile {
      * @param {(number[] | Forum[])} forums tableau contenant les forums cibles des modifications
      * @param {({ mode?: "add" | "set" | "remove" })} [options]
      * @param {"add" | "update" | "remove"} [options.mode] `"add"` pour ajouter les entrées aux favoris, `"update"` pour remplacer les favoris existants par les entrées (comportement par défaut), `"delete"` pour retirer les entrées de la liste des favoris
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<void>}
      */
     async editFavoriteForums(forums: number[] | Forum[], { mode = "update" }: { mode?: "add" | "update" | "remove" } = {}): Promise<void> {
         this._client.assertConnected();
         const route = 'accounts/me/favorites/forums';
-        let method;
+        let method: LibTypes.Requests.HttpMethod;
 
         switch (mode) {
             case "update":
@@ -140,12 +140,12 @@ export default class Profile {
      * @param {{ id: number; machine: number; }[]} games tableau contenant les jeux (ID et machine) cibles des modifications
      * @param {({ mode?: "add" | "update" | "remove" })} [options]
      * @param {"add" | "update" | "remove"} [options.mode] `"add"` pour ajouter les entrées aux favoris, `"update"` pour remplacer les favoris existants par les entrées (comportement par défaut), `"delete"` pour retirer les entrées de la liste des favoris
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<void>}
      */
     async editFavoriteGames(games: { id: number; machine: number; }[], { mode = "update" }: { mode?: "add" | "update" | "remove" } = {}): Promise<void> {
         this._client.assertConnected();
-        let method;
+        let method: LibTypes.Requests.HttpMethod;
 
         switch (mode) {
             case "update":
@@ -170,12 +170,12 @@ export default class Profile {
      * @param {number[] | Topic[]} topics tableau contenant les topics cibles des modifications
      * @param {({ mode?: "add" | "update" | "remove" })} [options]
      * @param {"add" | "update" | "remove"} [options.mode] `"add"` pour ajouter les entrées aux favoris, `"update"` pour remplacer les favoris existants par les entrées (comportement par défaut), `"delete"` pour retirer les entrées de la liste des favoris
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<void>}
      */
     async editFavoriteTopics(topics: number[] | Topic[], { mode = "update" } : { mode?: "add" | "update" | "remove" } = {}): Promise<void> {
         this._client.assertConnected();
-        let method;
+        let method: LibTypes.Requests.HttpMethod;
 
         switch (mode) {
             case "update":
@@ -199,8 +199,8 @@ export default class Profile {
      * Remplace l'avatar de profil par le fichier dont le chemin est donné en entrée.
      *
      * @param {string} filePath chemin du fichier
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le fichier fourni est invalide (pas une image ou trop volumineux)
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le fichier fourni est invalide (pas une image ou trop volumineux)
      * @returns  {Promise<void>}
      */
     async setAvatar(filePath: string): Promise<void> {
@@ -226,7 +226,7 @@ export default class Profile {
      * Modifie la description du profil.
      *
      * @param {string} description nouvelle description
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<void>}
      */
     async setDescription(description: string): Promise<void> {
@@ -240,7 +240,7 @@ export default class Profile {
      * Renvoie la liste des messages du compte sous forme de générateur asynchrone.
      * Cette méthode est lente car JVC renvoie des erreurs 403 si trop de requêtes sont envoyées sur un profil.
      *
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {AsyncGenerator<Post, void, unknown>}
      */
     async * getForumPosts(): AsyncGenerator<Post, void, unknown> {

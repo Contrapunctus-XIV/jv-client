@@ -11,7 +11,7 @@ import { V4Types } from "../types/index.js";
 
 
 /**
- * Classe représentant un contenu JVC (news, review, preview, etc.). Utilise l'API v4.
+ * Classe représentant un contenu JVC (news, review, preview, etc.). Utilise l'API `v4`.
  * 
  */
 export default class Content {
@@ -394,7 +394,7 @@ export default class Content {
 }
 
 /**
- * Classe qui hérite de Content et représente un contenu de type vidéo. Utilise l'API v4.
+ * Classe qui hérite de Content et représente un contenu de type vidéo. Utilise l'API `v4`.
  * 
  * @class
  * @extends Content

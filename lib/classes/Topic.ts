@@ -108,7 +108,7 @@ export default class Topic {
     /**
      * Renvoie l'URL exacte du topic.
      *
-     * @param {boolean} [api=false] si `true`, renvoie l'URL du topic sur l'API v4. Par défaut `false`.
+     * @param {boolean} [api=false] si `true`, renvoie l'URL du topic sur l'API `v4`. Par défaut `false`.
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
      * @returns  {Promise<string>}
      */

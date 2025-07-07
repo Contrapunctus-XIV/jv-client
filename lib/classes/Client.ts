@@ -90,7 +90,7 @@ export default class Client {
      * 
      * @param {string} alias pseudo JVC
      * @param {string} password mot de passe
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si les identifiants sont incorrects
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si les identifiants sont incorrects
      * @returns {Promise<string>}
      */
     async login(alias: string, password: string): Promise<string> {
@@ -126,7 +126,7 @@ export default class Client {
      * Méthode recommandée pour se connecter car n'est pas sujette à un cooldown du serveur si les connexions sont répétées.
      * 
      * @param {string} coniunctio le cookie de connexion
-     * @throws {@link errors.InexistentContent | NotConnected} si les identifiants sont incorrects
+     * @throws {@link errors.NotConnected | NotConnected} si les identifiants sont incorrects
      * @returns {Promise<void>}
      */
     async injectConiunctio(coniunctio: string): Promise<void> {

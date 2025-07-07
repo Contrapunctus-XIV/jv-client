@@ -170,7 +170,7 @@ export default class Forum {
     /**
      * Renvoie l'URL exacte du forum, obtenue après une requête à JVC.
      * 
-     * @param {boolean} [api] `true` pour renvoyer l'URL de l'API v4, `false` pour celle du site JVC (par défaut)
+     * @param {boolean} [api] `true` pour renvoyer l'URL de l'API `v4`, `false` pour celle du site JVC (par défaut)
      * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
      * @returns {Promise<string>}
      */

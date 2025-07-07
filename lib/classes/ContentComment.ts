@@ -10,7 +10,7 @@ import Content from "./Content.js";
 import { V4Types } from "../types/index.js";
 
 /**
- * Classe représentant un commentaire d'un utilisateur JVC posté sous un contenu (objet {@link Content}). Utilise l'API v4.
+ * Classe représentant un commentaire d'un utilisateur JVC posté sous un contenu (objet {@link Content}). Utilise l'API `v4`.
  *
  */
 export default class ContentComment {

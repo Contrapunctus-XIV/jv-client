@@ -7,7 +7,7 @@ import { InexistentContent } from "../errors.js";
 import { curl } from "../requests.js";
 import { CDV_URL, HTTP_CODES, SELECTORS } from "../vars.js";
 import Client from "./Client.js";
-import { convertJVCStringToDate, decodeAllJvCares } from "../utils.js";
+import { convertJVCStringToDate, decodeAllJvCare } from "../utils.js";
 import Account from "./Account.js";
 import { JVCTypes } from "../types/index.js";
 
@@ -133,7 +133,7 @@ const CDV_SELECTORS_AND_FUNCTIONS: JVCTypes.CDV.CDV_SELS_AND_FUNCS = {
 };
 
 /**
- * Classe prenant en entrée un pseudo et envoyant des requêtes au site JVC à la différence de {@link Account} qui utilise l'API v4.
+ * Classe prenant en entrée un pseudo et envoyant des requêtes au site JVC à la différence de {@link Account} qui utilise l'API `v4`.
  * 
  */
 export default class Alias {
@@ -210,7 +210,7 @@ export default class Alias {
      *
      * @param {Client} client instance connectée de `Client`
      * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
-     * @throws {@link errors.InexistentContent | NotConnected} si le client fourni n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client fourni n'est pas connecté
      * @returns {Promise<number | undefined>}
      */
     async getID(client: Client): Promise<number | undefined> {
@@ -222,7 +222,7 @@ export default class Alias {
         let url;
 
         const $ = load(await response.text());
-        decodeAllJvCares($);
+        decodeAllJvCare($);
 
         const reportSpan = $(SELECTORS["accountReport"]);
         if (reportSpan.length >= 1) {
@@ -276,7 +276,7 @@ export default class Alias {
     
         const html = await response.text();
         const $ = load(html);
-        decodeAllJvCares($);
+        decodeAllJvCare($);
     
         for (const [k, [sel, func]] of Object.entries(CDV_SELECTORS_AND_FUNCTIONS)) {
             const element = $(sel);

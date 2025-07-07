@@ -13,7 +13,7 @@ import Review from "./Review.js";
 import { V4Types } from "../types/index.js";
 
 /**
- * Classe permettant des interactions avec les contenus du site. Utilise l'API v4 et nécessite un {@link Client} connecté.
+ * Classe permettant des interactions avec les contenus du site. Utilise l'API `v4` et nécessite un {@link Client} connecté.
  *
  */
 export default class V4Client {
@@ -45,9 +45,9 @@ export default class V4Client {
      *
      * @param {Content} content instance représentant le contenu
      * @param {string} text corps du commentaire
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le contenu n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le compte est banni ou si le message est invalide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async addComment(content: Content, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -69,7 +69,7 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {(1 | -1)} vote 1 : positif, -1 : négatif
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
      * @returns  {Promise<void>}
      */
@@ -88,9 +88,9 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {string} text corps de la réponse
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le compte est banni ou si le message est invalide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async addAnswer(comment: ContentComment, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -117,9 +117,9 @@ export default class V4Client {
      * Retire le commentaire.
      *
      * @param {ContentComment} comment instance représentant le commentaire
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le contenu n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le commentaire n'appartient pas au compte
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le commentaire n'appartient pas au compte
      * @returns  {Promise<void>}
      */
     async deleteComment(comment: ContentComment): Promise<void> {
@@ -155,9 +155,9 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {string} text nouveau texte
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le commentaire n'appartient pas au compte, si le compte est banni ou si le message est invalide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le commentaire n'appartient pas au compte, si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async updateComment(comment: ContentComment, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -201,9 +201,9 @@ export default class V4Client {
      * @param {string} text corps de l'avis
      * @param {{ onProfile?: boolean }} [options]
      * @param {boolean} [options.onProfile] `true` pour faire apparaître l'avis sur la page de profil (par défaut)
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si le jeu n'existe pas sur la machine renseignée
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le compte est banni, si le message ou la note est invalide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni, si le message ou la note est invalide
      * @returns  {Promise<V4Types.Game.Review.Infos>}
      */
     async addReview(game: Game, machineId: number, mark: number, text: string, { onProfile = true }: { onProfile?: boolean } = {}): Promise<V4Types.Game.Review.Infos> {
@@ -222,7 +222,7 @@ export default class V4Client {
      * Supprime l'avis.
      *
      * @param {Review} review instance représentant l'avis
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si l'avis n'existe pas
      * @returns  {Promise<void>}
      */

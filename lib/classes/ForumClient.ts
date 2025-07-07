@@ -63,9 +63,9 @@ export default class ForumClient {
      * @param {string} body corps du topic
      * @param {{ poll?: JVCTypes.ForumClient.Poll }} [options] 
      * @param {JVCTypes.ForumClient.Poll} [options.poll] sondage optionnel que l'on peut poster avec le topic
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le texte n'est pas valide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le texte n'est pas valide
      * @return {Promise<Topic>}
      */
     postTopic(forum: Forum, title: string, body: string, options?: { poll?: JVCTypes.ForumClient.Poll }): Promise<Topic>;
@@ -126,9 +126,9 @@ export default class ForumClient {
      *
      * @param {Topic} topic
      * @param {string} text corps du message
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le texte n'est pas valide
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le texte n'est pas valide
      * @return {Promise<Post>}
      */
     async postMessage(topic: Topic, text: string): Promise<Post> {
@@ -158,7 +158,7 @@ export default class ForumClient {
      * 
      * @param topic
      * @param text corps des messages
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
      * @throws {@link !Error} si le délai est strictement inférieur à 15
      * @param { delay?: number } [options]
@@ -203,9 +203,9 @@ export default class ForumClient {
      *
      * @param {Post} post
      * @return {Promise<void>}
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le post n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le post n'appartient pas au compte
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le post n'appartient pas au compte
      */
     async deletePost(post: Post): Promise<void> {
         this._client.assertConnected();
@@ -230,9 +230,9 @@ export default class ForumClient {
      * Supprime le topic.
      *
      * @param {Topic} topic
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async deleteTopic(topic: Topic): Promise<void> {
@@ -246,9 +246,9 @@ export default class ForumClient {
      * Change l'état de résolution du topic (résolu -> non-résolu ou non-résolu -> résolu).
      *
      * @param {Topic} topic
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async toggleTopicResolution(topic: Topic): Promise<void> {
@@ -274,9 +274,9 @@ export default class ForumClient {
      *
      * @param {Topic} topic
      * @param {string} reason raison du lock
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.InexistentContent | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async lockTopic(topic: Topic, reason: string): Promise<void> {

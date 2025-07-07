@@ -77,7 +77,7 @@ export default class Post {
      *
      * @param {Client} client client connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le post n'existe pas
-     * @throws {@link errors.InexistentContent | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @returns  {Promise<JVCTypes.Post.Infos>}
      */
     async getInfos(client: Client): Promise<JVCTypes.Post.Infos> {

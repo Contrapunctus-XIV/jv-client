@@ -11,7 +11,7 @@ import { checkInteger } from "../utils.js";
 import { V4Types } from "../types/index.js";
 
 /**
- * Classe représentant un jeu vidéo. Utilise l'API v4.
+ * Classe représentant un jeu vidéo. Utilise l'API `v4`.
  *
  */
 export default class Game {
