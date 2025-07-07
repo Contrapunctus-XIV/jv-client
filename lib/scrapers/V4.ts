@@ -65,7 +65,7 @@ function request(route: string, { query = {}, raw = false, type = "content" }: V
 }
 
 /**
- * Classe contenant des méthodes statiques permettant de récupérer des jeux vidéo et des contenus selon des critères précis grâce à l'API v4.
+ * Classe contenant des méthodes statiques permettant de récupérer des jeux vidéo et des contenus selon des critères précis grâce à l'API `v4`.
  * @abstract
  * @hideconstructor
  */
