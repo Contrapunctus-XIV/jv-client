@@ -887,4 +887,48 @@ declare namespace JVCTypes {
     }
 }
 
-export { JVCTypes, V4Types };
+declare namespace LibTypes {
+    namespace Requests {
+        
+        /**
+         * @interface
+         */
+        interface Options {
+            method?: HttpMethod;
+            query?: Record<string, any>;
+            data?: any;
+            cookies?: Record<string, string>;
+            headers?: Record<string, string>;
+            allowedStatusErrors?: number[];
+        }
+
+        /**
+         * les attributs qui sont obtenus après parsing de la sortie de cURL
+         * @hidden
+         */
+        interface CurlRawResponse {
+            body: string;
+            headers: Record<string, string>;
+            status: number;
+            url: string;
+        }
+
+        /**
+         * @hidden
+         */
+        type CurlParsers = {
+            [K in keyof CurlRawResponse]: (str: string) => CurlRawResponse[K];
+        }
+        /**
+         * @hidden
+         */
+        type CurlScheme = { [K in keyof CurlRawResponse]: [string, string] }
+        /**
+         * @hidden
+         */
+        type CurlResults = { [K in keyof CurlRawResponse]: string | null }
+        type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS"
+    }
+}
+
+export { JVCTypes, V4Types, LibTypes };
