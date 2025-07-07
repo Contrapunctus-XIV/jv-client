@@ -1,12 +1,12 @@
 {
   "name": "jv-client",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "scripts": {
     "test": "exit 0",
     "build": "tsc",
-    "docs": "typedoc lib/**/* lib/index.ts --name API --readme lib/index.md --json api.json & rimraf docs & typedoc --entryPointStrategy merge api.json --alwaysCreateEntryPointModule --projectDocuments guides/quickstart.md --projectDocuments guides/scraping.md --projectDocuments guides/interact.md --projectDocuments guides/changelog.md & rimraf api.json"
+    "docs": "typedoc lib/**/* lib/index.ts --name API --readme lib/index.md --json api.json & rimraf docs & typedoc --entryPointStrategy merge api.json --alwaysCreateEntryPointModule --projectDocuments guides/quickstart.md --projectDocuments guides/scraping.md --projectDocuments guides/interact.md --projectDocuments guides/other.md --projectDocuments guides/changelog.md & rimraf api.json"
   },
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
