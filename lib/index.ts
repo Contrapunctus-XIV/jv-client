@@ -14,13 +14,14 @@ import Post from "./classes/Post.js";
 import ForumClient from "./classes/ForumClient.js";
 import Alias from "./classes/Alias.js";
 import { convertJVCStringToDate, decodeJvCare, isValidJVCText } from "./utils.js";
+import { callApi, curl } from "./requests.js";
 
 /**
  * Contient l'ensemble de ce qui est exporté par la librairie.
  */
 const JVClient = {
     Client, Account, Profile, Forum, Content, Video, V4, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, callApi, curl
 };
 
 /**
@@ -33,5 +34,5 @@ export default JVClient;
  */
 export {
     Client, Account, Profile, Forum, Content, Video, V4, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, callApi, curl
 };
