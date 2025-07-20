@@ -20,5 +20,5 @@ Les fonctions exportées par ce module permettent aux utilisateurs d'envoyer des
 
 ## Classe `NoelShack`
 La classe {@link classes.NoelShack | `NoelShack`} est une classe statique contenant deux méthodes qui permettent d'interagir avec le site d'hébergement d'images [NoelShack](https://www.noelshack.com/) utilisé sur les forums de JVC. Elles sont :
-- {@link classes.NoelShack.upload} : téléverse sur NoelShack l'image passée en entrée.
-- {@link classes.NoelShack.uploadMosaic} : réalise une mosaïque de l'image passée en entrée et la téléverse sur NoelShack.
+- {@link classes.NoelShack.upload | `upload`} : téléverse sur NoelShack l'image passée en entrée.
+- {@link classes.NoelShack.uploadMosaic | `uploadMosaic`} : réalise une mosaïque de l'image passée en entrée et la téléverse sur NoelShack.
