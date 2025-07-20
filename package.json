@@ -1,6 +1,6 @@
 {
   "name": "jv-client",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "scripts": {
@@ -32,6 +32,7 @@
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.0.0",
     "fs": "^0.0.1-security",
+    "sharp": "^0.34.3",
     "typescript": "^5.6.2"
   },
   "devDependencies": {
