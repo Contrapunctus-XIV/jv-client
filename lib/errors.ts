@@ -58,3 +58,17 @@ export class JvcErrorMessage extends Error {
         Object.setPrototypeOf(this, JvcErrorMessage.prototype);
     }
 }
+
+/**
+ * Erreur indiquant que l'utilisateur a entré une valeur invalide en tant qu'argument d'une fonction de la librairie.
+ * 
+ * @class
+ * @extends Error
+ */
+export class ValueError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "ValueError";
+        Object.setPrototypeOf(this, ValueError.prototype);
+    }
+}
