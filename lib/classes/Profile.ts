@@ -199,14 +199,14 @@ export default class Profile {
     /**
      * Remplace l'avatar de profil par le fichier dont le chemin est donné en entrée.
      *
-     * @param {string} filePath chemin du fichier
+     * @param {string} filepath chemin du fichier
      * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le fichier fourni est invalide (pas une image ou trop volumineux)
      * @returns  {Promise<void>}
      */
-    async setAvatar(filePath: string): Promise<void> {
+    async setAvatar(filepath: string): Promise<void> {
         this._client.assertConnected();
-        const stream = readFileSync(filePath);
+        const stream = readFileSync(filepath);
         const route = 'accounts/me/avatar';
         const response = await requestApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
         Profile.detectError(response);
@@ -215,9 +215,9 @@ export default class Profile {
     /**
      * @hidden
      */
-    private async setCover(filePath: string): Promise<void> {
+    private async setCover(filepath: string): Promise<void> {
         this._client.assertConnected();
-        const stream = readFileSync(filePath);
+        const stream = readFileSync(filepath);
         const route = 'accounts/me/cover';
         const response = await requestApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
         Profile.detectError(response);
