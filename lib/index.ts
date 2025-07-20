@@ -13,15 +13,16 @@ import JVCode from "./scrapers/JVCode.js";
 import Post from "./classes/Post.js";
 import ForumClient from "./classes/ForumClient.js";
 import Alias from "./classes/Alias.js";
+import NoelShack from "./classes/NoelShack.js";
 import { convertJVCStringToDate, decodeJvCare, isValidJVCText } from "./utils.js";
-import { callApi, curl } from "./requests.js";
+import { requestApi, request } from "./requests.js";
 
 /**
  * Contient l'ensemble de ce qui est exporté par la librairie.
  */
 const JVClient = {
-    Client, Account, Profile, Forum, Content, Video, V4, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, callApi, curl
+    Client, Account, Profile, Forum, Content, Video, V4, NoelShack, ContentComment, Game, V4Client, Review, Topic, JVCode,
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request
 };
 
 /**
@@ -33,6 +34,6 @@ export default JVClient;
  * @hidden
  */
 export {
-    Client, Account, Profile, Forum, Content, Video, V4, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, callApi, curl
+    Client, Account, Profile, Forum, Content, Video, V4, ContentComment, NoelShack, Game, V4Client, Review, Topic, JVCode,
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request
 };
