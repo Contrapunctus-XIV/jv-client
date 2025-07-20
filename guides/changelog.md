@@ -29,4 +29,7 @@ title: Notes de version
 - **v0.2.1** : modifications mineures de la documentation
 - **v0.2.2** : modifications mineures de la documentation
 - **v0.2.3** : correction d'une erreur dans la structure de la librairie qui empêchait l'utilisateur de bénéficier de son typage, modifications mineures de la documentation
-- **v0.2.4** : exportation et documentation de deux fonctions, {@link requests.callApi | `callApi`} et {@link requests.curl | `curl`}, qui étaient déjà implémentées et permettent d'envoyer des requêtes à l'API `v4` ainsi qu'au site JVC, ce qui peut être utile pour des développeurs qui souhaitent faire des requêtes personnalisées à ces services. Ajout de la page [*Fonctions diverses*](./other.md) et modifications mineures de la documentation.
+- **v0.2.4** : exportation et documentation de deux fonctions, `callApi` et `curl`, qui étaient déjà implémentées et permettent d'envoyer des requêtes à l'API `v4` ainsi qu'au site JVC, ce qui peut être utile pour des développeurs qui souhaitent faire des requêtes personnalisées à ces services. Ajout de la page [*Fonctions diverses*](./other.md) et modifications mineures de la documentation.
+
+## v0.3 (20/07/2025)
+- **v0.3.0** : ajout de la classe {@link classes.NoelShack | `NoelShack`}, refonte des fonctions du module {@link requests | `requests`} (remplacement de `curl` et `callApi` par {@link requests.request | `request`} et {@link requests.requestApi | `requestApi`}), ajout d'une dépendance ([`sharp`](https://www.npmjs.com/package/sharp)), modifications mineures de la documentation.

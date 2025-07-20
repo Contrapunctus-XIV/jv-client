@@ -1,10 +1,10 @@
 ---
-title: Fonctions diverses
+title: Fonctionnalités diverses
 ---
 
-# Fonctions diverses
+# Fonctionnalités diverses
 
-La présente librairie embarque un certain nombre d'autres fonctions qui ne rentrent ni dans le domaine du *scraping* de données ni dans celui des interactions connectées spécifiquement. Elles sont réparties en deux modules, le module `utils` et le module `requests`.
+La présente librairie embarque un certain nombre d'autres fonctions et classes qui ne rentrent ni dans le domaine du *scraping* de données ni dans celui des interactions connectées spécifiquement.
 
 ## Utilitaires (module `utils`)
 Les fonctions exportées par ce module sont :
@@ -15,5 +15,10 @@ Les fonctions exportées par ce module sont :
 
 ## Fonctions de requête (module `requests`)
 Les fonctions exportées par ce module permettent aux utilisateurs d'envoyer des requêtes personnalisées aux services JVC. Elles sont :
-- {@link requests.callApi | `callApi`} : effectue une requête à l'*endpoint* de l'API `v4` passé en entrée, avec les options spécifiées.
-- {@link requests.curl | `curl`} : effectue une requête à l'URL passée en entrée, avec les options spécifiées. Utilise le logiciel [`cURL`](https://curl.se/docs/manpage.html) pour contourner les restrictions Cloudflare des serveurs JVC.
+- {@link requests.request | `request`} : effectue une requête à l'URL passée en entrée, avec les options spécifiées. Peut utiliser le logiciel [`cURL`](https://curl.se/docs/manpage.html) pour contourner les restrictions Cloudflare des serveurs JVC.
+- {@link requests.requestApi | `requestApi`} : effectue une requête à l'*endpoint* de l'API `v4` passé en entrée, avec les options spécifiées.
+
+## Classe `NoelShack`
+La classe {@link classes.NoelShack | `NoelShack`} est une classe statique contenant deux méthodes qui permettent d'interagir avec le site d'hébergement d'images [NoelShack](https://www.noelshack.com/) utilisé sur les forums de JVC. Elles sont :
+- {@link classes.NoelShack.upload} : téléverse sur NoelShack l'image passée en entrée.
+- {@link classes.NoelShack.uploadMosaic} : réalise une mosaïque de l'image passée en entrée et la téléverse sur NoelShack.
