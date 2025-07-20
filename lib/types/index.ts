@@ -885,6 +885,19 @@ declare namespace JVCTypes {
             errors: string;
         };
     }
+
+    namespace NoelShack {
+        interface UploadInfos {
+            erreurs: string;
+            nb: number;
+            chats: string;
+            forums: string;
+            blogs: string;
+            url: string;
+            nom: string;
+            mini: string;
+        }
+    }
 }
 
 declare namespace LibTypes {
@@ -922,12 +935,14 @@ declare namespace LibTypes {
         /**
          * @hidden
          */
-        type CurlScheme = { [K in keyof CurlRawResponse]: [string, string] }
+        type CurlScheme = { [K in keyof CurlRawResponse]: [string, string] };
         /**
          * @hidden
          */
-        type CurlResults = { [K in keyof CurlRawResponse]: string | null }
-        type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS"
+        type CurlResults = { [K in keyof CurlRawResponse]: string | null };
+        type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS";
+        type BodyMode = "json" | "url" | "form" | "any";
+        type BodyType = string | Record<string, any> | URLSearchParams | FormData | any;
     }
 }
 
