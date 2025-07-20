@@ -197,18 +197,28 @@ export default class Profile {
     }
 
     /**
-     * Remplace l'avatar de profil par le fichier dont le chemin est donné en entrée.
+     * Remplace l'image de profil par le fichier image passé en entrée.
      *
-     * @param {string} filepath chemin du fichier
+     * @param {string} file la nouvelle image de profil. Peut être un chemin pointant vers le fichier (`string`), une URL (objet {@link !URL | `URL`}) ou un `Buffer`
      * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le fichier fourni est invalide (pas une image ou trop volumineux)
+     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le téléversement a échoué (fichier invalide)
      * @returns  {Promise<void>}
      */
-    async setAvatar(filepath: string): Promise<void> {
+    async setAvatar(file: string | URL | Buffer): Promise<void> {
         this._client.assertConnected();
-        const stream = readFileSync(filepath);
+        let buffer;
+
+        if (typeof file === "string") {
+            buffer = readFileSync(file);
+        } else if (file instanceof URL) {
+            const bufferRequest = await request(file);
+            buffer = Buffer.from(await bufferRequest.arrayBuffer());
+        } else {
+            buffer = file;
+        }
+        
         const route = 'accounts/me/avatar';
-        const response = await requestApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
+        const response = await requestApi(route, { method: "PUT", data: buffer, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
         Profile.detectError(response);
     }
 
