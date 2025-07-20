@@ -4,26 +4,13 @@
 
 import * as fs from 'fs';
 import { EMOJI_REGEX, VALID_JVC_CHARACTERS, FRENCH_MONTHS_TO_NUMBER, SELECTORS, INTEGER_LIMIT } from './vars.js';
+import { ValueError } from './errors.js';
 
 /**
  * @hidden
  */
 export function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
- * @hidden
- */
-export function readFileAsBytes(filePath: string): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, { encoding: null }, (err: any, data: any) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(data);
-        });
-    });
 }
 
 /**
@@ -51,7 +38,7 @@ function findInvalidChar(str: string, validChars: Array<string>): boolean {
  * 
  * @param text texte à traiter
  * @param { minimumLength?: number, checkForInvalidChar?: boolean } [options]
- * @param {number} [options.minimumLength] nombre minimal de caractères accepté, par défaut 3
+ * @param {number} [options.minimumLength] nombre minimal de caractères accepté, par défaut `3`
  * @param {boolean} [options.checkForInvalidChar] `true` pour vérifier si le texte comporte des caractères invalides (par défaut), `false` sinon
  * @returns {boolean}
  */
@@ -190,6 +177,6 @@ export function decodeAllJvCare($: cheerio.Root): cheerio.Root {
  */
 export function checkInteger(nb: number) {
     if (nb >= INTEGER_LIMIT) {
-        throw new Error(`Value ${nb} is too big for PostgreSQL's Integer (maximum: ${INTEGER_LIMIT - 1}).`);
+        throw new ValueError(`Value ${nb} is too big for PostgreSQL's Integer (maximum: ${INTEGER_LIMIT - 1}).`);
     }
 }
