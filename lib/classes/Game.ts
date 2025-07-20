@@ -2,7 +2,7 @@
  * @module classes
  */
 
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { InexistentContent } from "../errors.js";
 import Content, { Video } from "./Content.js";
 import Review from "./Review.js";
@@ -72,7 +72,7 @@ export default class Game {
     private request(route: string, options: V4Types.Request.Game.RequestOptions & { type: "review" }): Promise<Review[]>;
     private request(route: string, options?: V4Types.Request.Game.RequestOptions): Promise<Content[]>;
     private request(route: string, { query = {}, raw = false, type = "content", machineId = null }: V4Types.Request.Game.RequestOptions = {}) {
-        return callApi(route, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] })
+        return requestApi(route, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] })
             .then(response => {
                 this._rejectIfInexistent(response, machineId);
                 return response.json();
@@ -113,7 +113,7 @@ export default class Game {
     async doesGameExist(): Promise<boolean> {
         const route = `games/${this._id}/any`;
 
-        const response = await callApi(route);
+        const response = await requestApi(route);
         return response.ok;
     }
 
@@ -127,7 +127,7 @@ export default class Game {
      */
     async getInfos({ machineId }: { machineId?: number } = {}): Promise<V4Types.Game.Infos> {
         const route = machineId ? `games/${this._id}/${machineId}` : `games/${this._id}/any`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response, machineId);
 
@@ -146,7 +146,7 @@ export default class Game {
      */
     async getDetails({ machineId }: { machineId?: number } = {}): Promise<V4Types.Game.GameDetails> {
         const route = machineId ? `games/${this._id}/${machineId}/details` : `games/${this._id}/any/details`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response, machineId);
 
@@ -164,7 +164,7 @@ export default class Game {
      */
     async getLightInfos({ machineId }: { machineId?: number } = {}): Promise<V4Types.Game.Generic> {
         const route = machineId ? `games/${this._id}/${machineId}/light` : `games/${this._id}/any/light`;
-        const response = await callApi(route, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+        const response = await requestApi(route, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
 
         this._rejectIfInexistent(response, machineId);
 
@@ -182,7 +182,7 @@ export default class Game {
      */
     async getImages({ machineId }: { machineId?: number } = {}): Promise<V4Types.Game.Images> {
         const route = machineId ? `games/${this._id}/${machineId}/images` : `games/${this._id}/any/images`;
-        const response = await callApi(route, { query: { perPage: 100_000 } });
+        const response = await requestApi(route, { query: { perPage: 100_000 } });
 
         this._rejectIfInexistent(response, machineId);
 
@@ -199,7 +199,7 @@ export default class Game {
      */
     async getReviewsStats(): Promise<V4Types.Game.Reviews.GlobalStats[]> {
         const route = `games/${this._id}/any/reviews`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 
@@ -237,7 +237,7 @@ export default class Game {
      * @param {{ paging?: V4Types.Request.Paging, machineId?: number, raw?: boolean, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)}
@@ -255,7 +255,7 @@ export default class Game {
      * @param {{ page: number, machineId?: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(Promise<Content[] | V4Types.Contents.Raw>)}
@@ -301,7 +301,7 @@ export default class Game {
      * @param {{ raw?: boolean, paging?: V4Types.Request.Paging, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Game.Reviews.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Review})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(AsyncGenerator<Review[] | V4Types.Game.Reviews.Raw, void, unknown>)}
      */
@@ -318,7 +318,7 @@ export default class Game {
      * @param {{ raw?: boolean, page: number, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Game.Reviews.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Review})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(Promise<Review[] | V4Types.Game.Reviews.Raw>)}
      */
@@ -363,7 +363,7 @@ export default class Game {
      * @param {{ paging?: V4Types.Request.Paging, machineId?: number, raw?: boolean, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(AsyncGenerator<Video[] | V4Types.Videos.Raw, void, unknown>)}
@@ -381,7 +381,7 @@ export default class Game {
      * @param {{ page: number, machineId?: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(Promise<Video[] | V4Types.Videos.Raw>)}
@@ -426,7 +426,7 @@ export default class Game {
      * @param {{ paging?: V4Types.Request.Paging, machineId?: number, raw?: boolean, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)}
@@ -444,7 +444,7 @@ export default class Game {
      * @param {{ page: number, machineId?: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {number} [options.machineId] à renseigner pour traiter une machine spécifique du jeu, par défaut les données globales du jeu sont renvoyées
      * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si la machine spécifiée n'existe pas sur le jeu
      * @returns  {(Promise<Content[] | V4Types.Contents.Raw>)}

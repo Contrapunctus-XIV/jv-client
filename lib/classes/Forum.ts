@@ -3,7 +3,7 @@
  */
 
 import { API_DOMAIN, SELECTORS, TOPIC_FEED_SELECTORS, TOPIC_ICONS, TOPICS_PER_PAGE, DOMAIN, SECOND_DELAY, URL_PLACEHOLDER, FORUMS_PAGE, HTTP_CODES } from "../vars.js";
-import { curl } from "../requests.js";
+import { request } from "../requests.js";
 import { load } from "cheerio";
 import { checkInteger, convertJVCStringToDate, sleep } from "../utils.js";
 import Topic from "./Topic.js";
@@ -46,7 +46,7 @@ export default class Forum {
 
             while (end ? currentPage <= end : true) {
                 const forumUrl = self.setUrlPage(currentPage, url);
-                const response = await curl(forumUrl, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+                const response = await request(forumUrl, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
                 
                 self._rejectIfInexistent(response);
 
@@ -67,10 +67,10 @@ export default class Forum {
      * @private
      * @hidden
      */
-    private request(url: string, options: JVCTypes.Request.RequestOptions & { raw: true }): Promise<JVCTypes.Forum.Topic[]>;
-    private request(url: string, options?: JVCTypes.Request.RequestOptions): Promise<Topic[]>;
-    private request(url: string, { raw = false, query = {} }: JVCTypes.Request.RequestOptions) {
-        return curl(url, { query })
+    private requestForum(url: string, options: JVCTypes.Request.RequestOptions & { raw: true }): Promise<JVCTypes.Forum.Topic[]>;
+    private requestForum(url: string, options?: JVCTypes.Request.RequestOptions): Promise<Topic[]>;
+    private requestForum(url: string, { raw = false, query = {} }: JVCTypes.Request.RequestOptions) {
+        return request(url, { query, curl: true })
             .then(response => {
                 // JVC renvoie une erreur 404 si la page n'existe pas, mais redirection si le forum n'existe pas
                 // on renvoie un tableau vide dans le premier cas, mais erreur dans le second
@@ -131,7 +131,7 @@ export default class Forum {
      * @returns {Promise<string>}
      */
     async getForumTitle(): Promise<string> {
-        const response = await curl(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+        const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
         this._rejectIfInexistent(response);
 
         const $ = load(await response.text());
@@ -144,7 +144,7 @@ export default class Forum {
      * @returns {Promise<boolean>}
      */
     async doesForumExist(): Promise<boolean> {
-        const response = await curl(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+        const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
 
         return response.ok;
     }
@@ -175,7 +175,7 @@ export default class Forum {
      * @returns {Promise<string>}
      */
     async getRealURL(api: boolean = false): Promise<string> {
-        const response = await curl(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+        const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
         this._rejectIfInexistent(response);
         return api ? response.url : response.url.replace(API_DOMAIN, DOMAIN);
     }
@@ -271,7 +271,7 @@ export default class Forum {
     readTopics({ paging = {}, page, raw = false }: JVCTypes.Request.Options = {}): AsyncGenerator<any, void, unknown> | Promise<any> {
         if (page !== undefined) {
             const url = this.setUrlPage(page, this._api_url);
-            return this.request(url, { raw });
+            return this.requestForum(url, { raw });
         }
 
         return this.generator(this._api_url, paging, { raw });
@@ -324,7 +324,7 @@ export default class Forum {
     
         if (page !== undefined) {
             return urlPromise.then(url => {
-                return this.request(url, { raw, query });
+                return this.requestForum(url, { raw, query });
             });
         }
     
@@ -343,7 +343,7 @@ export default class Forum {
      * @returns {Promise<number>}
      */
     async getConnected(): Promise<number> {
-        const response = await curl(this._url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+        const response = await request(this._url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
 
         this._rejectIfInexistent(response);
 
@@ -381,7 +381,7 @@ export default class Forum {
         const topicsSeen: number[] = [];
 
         while (true) {
-            const response = await curl(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND] });
+            const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
 
             this._rejectIfInexistent(response);
 

@@ -3,7 +3,7 @@
  */
 
 import { InexistentContent } from "../errors.js";
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { checkInteger } from "../utils.js";
 import { HTTP_CODES } from "../vars.js";
 import Game from "./Game.js";
@@ -83,7 +83,7 @@ export default class Review {
      */
     async doesReviewExist(): Promise<boolean> {
         const route = `games/${this._gameId}/${this._machineId}/reviews/users/${this._id}`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         return response.ok;
     }
@@ -96,7 +96,7 @@ export default class Review {
      */
     async getInfos(): Promise<V4Types.Game.Review.Infos> {
         const route = `games/${this._gameId}/${this._machineId}/reviews/users/${this._id}`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 

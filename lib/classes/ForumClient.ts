@@ -2,12 +2,12 @@
  * @module classes
  */
 
-import { curl } from "../requests.js";
+import { request } from "../requests.js";
 import { load } from "cheerio";
 import Client from "./Client.js";
 import Forum from "./Forum.js";
 import { DEFAULT_UP_DELAY, FORUMS_APP_REGEX, MINIMAL_UP_DELAY, POST_MODERATION_URL, POST_URL, RESOLVE_TOPIC_URL, SECOND_DELAY, SELECTORS, TOPIC_MODERATION_URL, TOPIC_POST_URL } from "../vars.js";
-import { JvcErrorMessage } from "../errors.js";
+import { JvcErrorMessage, ValueError } from "../errors.js";
 import Topic from "./Topic.js";
 import Post from "./Post.js";
 import { sleep } from "../utils.js";
@@ -72,7 +72,7 @@ export default class ForumClient {
     async postTopic(forum: Forum, title: string, body: string, { poll }: { poll?: JVCTypes.ForumClient.Poll } = {}) {
         this._client.assertConnected();
 
-        const inputsRes = await curl(forum.url, { cookies: this._client.session });
+        const inputsRes = await request(forum.url, { cookies: this._client.session, curl: true });
         const preData = (await this.getFormData(inputsRes))!;
         const data = {
             topicTitle: title,
@@ -94,7 +94,7 @@ export default class ForumClient {
             data["responsesSurvey[]"] = poll.answers;
         }
 
-        const response = await curl(TOPIC_POST_URL, { method: "POST", cookies: this._client.session, data, headers: { "content-type": "multipart/form-data" } });
+        const response = await request(TOPIC_POST_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "form", curl: true });
         const responseClone = response.clone()
         await ForumClient.detectJvcErrors(response);
 
@@ -134,7 +134,7 @@ export default class ForumClient {
     async postMessage(topic: Topic, text: string): Promise<Post> {
         this._client.assertConnected();
 
-        const inputsRes = await curl(topic.url, { cookies: this._client.session });
+        const inputsRes = await request(topic.url, { cookies: this._client.session, curl: true });
         const preData = (await this.getFormData(inputsRes))!;
         const data = {
             text,
@@ -146,7 +146,7 @@ export default class ForumClient {
             messageId: "undefined"
         };
 
-        const response = await curl(POST_URL, { method: "POST", cookies: this._client.session, data, headers: { "Content-Type": "multipart/form-data" } });
+        const response = await request(POST_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "form", curl: true });
         await ForumClient.detectJvcErrors(response);
 
         const postId = parseInt(response.url.split("_").pop()!);
@@ -160,13 +160,13 @@ export default class ForumClient {
      * @param text corps des messages
      * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
      * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link !Error} si le délai est strictement inférieur à 15
+     * @throws {@link errors.ValueError | `ValueError`} si le délai spécifié est invalide
      * @param { delay?: number } [options]
-     * @param { number } [options.delay] délai entre chaque *up* en secondes (par défaut 25, ne peut être en dessous de 15)
+     * @param { number } [options.delay] délai entre chaque *up* en secondes (par défaut `25`, ne peut être en dessous de `15`)
      */
     up(topic: Topic, text: string, { delay = DEFAULT_UP_DELAY }: { delay?: number } = {}): void {
         if (delay < MINIMAL_UP_DELAY) {
-            throw new Error(`Up delay must be greater than ${MINIMAL_UP_DELAY} seconds.`);
+            throw new ValueError(`Up delay must be greater than ${MINIMAL_UP_DELAY} seconds.`);
         }
 
         let post: Post | undefined = undefined;
@@ -210,7 +210,7 @@ export default class ForumClient {
     async deletePost(post: Post): Promise<void> {
         this._client.assertConnected();
 
-        const hashRes = await curl(post.url, { cookies: this._client.session });
+        const hashRes = await request(post.url, { cookies: this._client.session, curl: true });
 
         post._rejectIfInexistent(hashRes);
 
@@ -222,7 +222,7 @@ export default class ForumClient {
             "ajax_hash": hash
         }
 
-        const response = await curl(POST_MODERATION_URL, { method: "POST", cookies: this._client.session, headers: { "content-type": "application/x-www-form-urlencoded" }, data });
+        const response = await request(POST_MODERATION_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "url", curl: true });
         this.detectAjaxError(response);
     }
 
@@ -254,7 +254,7 @@ export default class ForumClient {
     async toggleTopicResolution(topic: Topic): Promise<void> {
         this._client.assertConnected();
 
-        const hashRes = await curl(topic.url, { cookies: this._client.session });
+        const hashRes = await request(topic.url, { cookies: this._client.session, curl: true });
 
         topic._rejectIfInexistent(hashRes);
 
@@ -265,7 +265,7 @@ export default class ForumClient {
             "ajax_hash": hash
         };
 
-        const response = await curl(RESOLVE_TOPIC_URL, { method: "POST", data, cookies: this._client.session, headers: { "content-type": "application/x-www-form-urlencoded" } });
+        const response = await request(RESOLVE_TOPIC_URL, { method: "POST", data, cookies: this._client.session, bodyMode: "url", curl: true });
         this.detectAjaxError(response);
     }
 
@@ -282,7 +282,7 @@ export default class ForumClient {
     async lockTopic(topic: Topic, reason: string): Promise<void> {
         this._client.assertConnected();
 
-        const hashRes = await curl(topic.url, { cookies: this._client.session });
+        const hashRes = await request(topic.url, { cookies: this._client.session, curl: true });
         topic._rejectIfInexistent(hashRes);
 
         const $ = load(await hashRes.text());
@@ -296,7 +296,7 @@ export default class ForumClient {
             "action": "post"
         };
 
-        const response = await curl(TOPIC_MODERATION_URL, { method: "POST", cookies: this._client.session, headers: { "content-type": "application/x-www-form-urlencoded" }, data });
+        const response = await request(TOPIC_MODERATION_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "url", curl: true });
         this.detectAjaxError(response);
     }
 }

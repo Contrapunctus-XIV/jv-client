@@ -3,16 +3,17 @@
  */
 
 import Client from "./Client.js";
-import { callApi, curl } from '../requests.js';
+import { requestApi, request } from '../requests.js';
 import Game from "./Game.js";
 import Forum from "./Forum.js";
 import Topic from "./Topic.js";
-import { decodeJvCare, readFileAsBytes } from "../utils.js";
+import { decodeJvCare } from "../utils.js";
 import { JvcErrorMessage } from "../errors.js";
 import Post from "./Post.js";
 import { CDV_POSTS_URL, SELECTORS } from "../vars.js";
 import { load } from "cheerio";
-import { JVCTypes, LibTypes, V4Types } from "../types/index.js";
+import { LibTypes, V4Types } from "../types/index.js";
+import { readFileSync } from "fs";
 
 /**
  * Classe permettant des opérations sur le profil public d'un compte JVC. Utilise l'API `v4` et nécessite un {@link Client} connecté.
@@ -51,7 +52,7 @@ export default class Profile {
     async getInfos(): Promise<V4Types.Account.Infos> {
         this._client.assertConnected();
         const route = 'accounts/me/profile';
-        const response = await callApi(route, { cookies: this._client.session });
+        const response = await requestApi(route, { cookies: this._client.session });
 
         const data = await response.json() as V4Types.Account.Infos;
         return data;
@@ -66,7 +67,7 @@ export default class Profile {
     async getPage(): Promise<V4Types.Account.Page.Raw> {
         this._client.assertConnected();
         const route = 'accounts/me/page';
-        const response = await callApi(route, { cookies: this._client.session });
+        const response = await requestApi(route, { cookies: this._client.session });
 
         const data = await response.json() as V4Types.Account.Page.Raw;
         return data;
@@ -92,7 +93,7 @@ export default class Profile {
     async getFavorites({ raw = false }: { raw?: boolean } = {}): Promise<V4Types.Account.Favorites.Default | V4Types.Account.Favorites.Raw> {
         this._client.assertConnected();
         const route = 'accounts/me/favorites';
-        const response = await callApi(route, { cookies: this._client.session });
+        const response = await requestApi(route, { cookies: this._client.session });
 
         const data = await response.json() as V4Types.Account.Favorites.Raw;
 
@@ -130,7 +131,7 @@ export default class Profile {
         }
 
         const forumsIds = forums.map((forum: number | Forum) => forum instanceof Forum ? forum.id : forum);
-        const response = await callApi(route, { method, data: { forums: forumsIds }, cookies: this._client.session });
+        const response = await requestApi(route, { method, data: { forums: forumsIds }, cookies: this._client.session });
         Profile.detectError(response);
     }
 
@@ -160,7 +161,7 @@ export default class Profile {
         }
 
         const route = 'accounts/me/favorites/games';
-        const response = await callApi(route, { method, data: { games }, cookies: this._client.session });
+        const response = await requestApi(route, { method, data: { games }, cookies: this._client.session });
         Profile.detectError(response);
     }
 
@@ -191,7 +192,7 @@ export default class Profile {
 
         const route = 'accounts/me/favorites/topics';
         const topicsIds = topics.map((topic: number | Topic) => topic instanceof Topic ? topic.id : topic);
-        const response = await callApi(route, { method, data: { topics: topicsIds }, cookies: this._client.session });
+        const response = await requestApi(route, { method, data: { topics: topicsIds }, cookies: this._client.session });
         Profile.detectError(response);
     }
 
@@ -205,9 +206,9 @@ export default class Profile {
      */
     async setAvatar(filePath: string): Promise<void> {
         this._client.assertConnected();
-        const stream = await readFileAsBytes(filePath);
+        const stream = readFileSync(filePath);
         const route = 'accounts/me/avatar';
-        const response = await callApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session });
+        const response = await requestApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
         Profile.detectError(response);
     }
 
@@ -216,9 +217,9 @@ export default class Profile {
      */
     private async setCover(filePath: string): Promise<void> {
         this._client.assertConnected();
-        const stream = await readFileAsBytes(filePath);
+        const stream = readFileSync(filePath);
         const route = 'accounts/me/cover';
-        const response = await callApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session });
+        const response = await requestApi(route, { method: "PUT", data: stream, headers: { 'content-type': 'application/octet-stream' }, cookies: this._client.session, bodyMode: "any" });
         Profile.detectError(response);
     }
 
@@ -232,7 +233,7 @@ export default class Profile {
     async setDescription(description: string): Promise<void> {
         this._client.assertConnected();
         const route = 'accounts/me/profile/description';
-        const response = await callApi(route, { method: 'PUT', data: { description }, cookies: this._client.session });
+        const response = await requestApi(route, { method: 'PUT', data: { description }, cookies: this._client.session });
         Profile.detectError(response);
     }
 
@@ -248,7 +249,7 @@ export default class Profile {
         let url = CDV_POSTS_URL.replace("*", this._client.alias!.toLowerCase());
         
         while (true) {
-            const response = await curl(url, { cookies: this._client.session });
+            const response = await request(url, { cookies: this._client.session, curl: true });
             const $ = load(await response.text());
             const posts = $(SELECTORS["cdvPost"]);
 

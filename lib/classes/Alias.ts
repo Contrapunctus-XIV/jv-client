@@ -4,7 +4,7 @@
 
 import { load } from "cheerio";
 import { InexistentContent } from "../errors.js";
-import { curl } from "../requests.js";
+import { request } from "../requests.js";
 import { CDV_URL, HTTP_CODES, SELECTORS } from "../vars.js";
 import Client from "./Client.js";
 import { convertJVCStringToDate, decodeAllJvCare } from "../utils.js";
@@ -186,7 +186,7 @@ export default class Alias {
      * @returns {Promise<boolean>}
      */
     async doesAliasExist(): Promise<boolean> {
-        const response = await curl(this._url);
+        const response = await request(this._url, { curl: true });
         return response.ok;
     }
 
@@ -197,7 +197,7 @@ export default class Alias {
      * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
      */
     async isBanned(): Promise<boolean> {
-        const response = await curl(this._url);
+        const response = await request(this._url, { curl: true });
 
         this._rejectIfInexistent(response);
         const $ = load(await response.text());
@@ -216,7 +216,7 @@ export default class Alias {
     async getID(client: Client): Promise<number | undefined> {
         client.assertConnected();
 
-        const response = await curl(this._url, { cookies: client.session });
+        const response = await request(this._url, { cookies: client.session, curl: true });
 
         this._rejectIfInexistent(response);
         let url;
@@ -270,7 +270,7 @@ export default class Alias {
             games: undefined
         };
     
-        const response = await curl(this._url);
+        const response = await request(this._url, { curl: true });
     
         this._rejectIfInexistent(response);
     

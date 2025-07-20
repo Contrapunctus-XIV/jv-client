@@ -4,7 +4,7 @@
 
 import { load } from "cheerio";
 import { InexistentContent } from "../errors.js";
-import { curl } from "../requests.js";
+import { request } from "../requests.js";
 import { DOMAIN, HTTP_CODES, POST_SELECTORS } from "../vars.js";
 import { checkInteger, convertJVCStringToDate } from "../utils.js";
 import JVCode from "../scrapers/JVCode.js";
@@ -56,7 +56,7 @@ export default class Post {
      * @returns  {Promise<boolean>}
      */
     async doesPostExist(): Promise<boolean> {
-        const response = await curl(this._url);
+        const response = await request(this._url, { curl: true });
 
         return response.ok;
     }
@@ -83,7 +83,7 @@ export default class Post {
     async getInfos(client: Client): Promise<JVCTypes.Post.Infos> {
         client.assertConnected();
         
-        const response = await curl(this._url, { cookies: client.session });
+        const response = await request(this._url, { cookies: client.session, curl: true });
 
         this._rejectIfInexistent(response);
 

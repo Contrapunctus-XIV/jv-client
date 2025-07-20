@@ -4,7 +4,7 @@
  */
 
 import { InexistentContent } from "../errors.js";
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { uniformize_string } from "../utils.js";
 import { writeFile } from "fs";
 import { V4Types } from "../types/index.js";
@@ -33,7 +33,7 @@ export default class Config {
     async init(): Promise<V4Types.Config.General> {
         const route = 'general/config';
 
-        const response = await callApi(route);
+        const response = await requestApi(route);
         const data = await response.json() as V4Types.Config.General;
         this._file = data;
 

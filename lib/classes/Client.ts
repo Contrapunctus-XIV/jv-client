@@ -3,7 +3,7 @@
  */
 
 import { JvcErrorMessage, JvcResponseError, NotConnected } from "../errors.js";
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { sleep } from "../utils.js";
 import { CONNECTION_DELAY, HTTP_CODES } from "../vars.js";
 import Account from "./Account.js";
@@ -97,7 +97,7 @@ export default class Client {
         await this.logout();
 
         const route = 'accounts/login';
-        const response = await callApi(route, { method: 'POST', data: { alias, password }, allowedStatusErrors: [HTTP_CODES.CONFLICT] });
+        const response = await requestApi(route, { method: 'POST', data: { alias, password }, allowedStatusErrors: [HTTP_CODES.CONFLICT] });
         await Client.detectError(response);
         await sleep(CONNECTION_DELAY);
 
@@ -123,7 +123,7 @@ export default class Client {
 
     /**
      * Stocke le cookie de connexion passé en entrée après vérification de sa validité auprès des serveurs de JVC.
-     * Méthode recommandée pour se connecter car n'est pas sujette à un cooldown du serveur si les connexions sont répétées.
+     * Méthode recommandée pour se connecter car n'est pas sujette à un *cooldown* du serveur si les connexions sont répétées.
      * 
      * @param {string} coniunctio le cookie de connexion
      * @throws {@link errors.NotConnected | NotConnected} si les identifiants sont incorrects
@@ -135,7 +135,7 @@ export default class Client {
 
         await sleep(CONNECTION_DELAY);
 
-        const response = await callApi("accounts/me", { cookies: session, allowedStatusErrors: [HTTP_CODES.UNAUTHORIZED] });
+        const response = await requestApi("accounts/me", { cookies: session, allowedStatusErrors: [HTTP_CODES.UNAUTHORIZED] });
         if (!response.ok) {
             throw new NotConnected("The coniunctio cookie you have provided is not valid.");
         }
@@ -158,7 +158,7 @@ export default class Client {
             return;
         }
 
-        await callApi('accounts/logout', { method: 'POST', cookies: this._session });
+        await requestApi('accounts/logout', { method: 'POST', cookies: this._session });
 
         this._session.coniunctio = ''
         this._alias = undefined;

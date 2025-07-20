@@ -2,7 +2,7 @@
  * @module classes
  */
 
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { InexistentContent } from "../errors.js";
 import ContentComment from "./ContentComment.js";
 import { DEFAULT_PER_PAGE, HTTP_CODES } from "../vars.js";
@@ -78,7 +78,7 @@ export default class Content {
     private request(route: string, options: V4Types.Request.RequestOptions & { type: "topComment" }): Promise<ContentComment[]>;
     private request(route: string, options?: V4Types.Request.RequestOptions): Promise<Content[]>;
     private request(route: string, { query = {}, raw = false, type = "content" }: V4Types.Request.RequestOptions = {}) {
-        return callApi(route, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] })
+        return requestApi(route, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND] })
             .then(response => {
                 this._rejectIfInexistent(response);
                 return response.json();
@@ -105,7 +105,7 @@ export default class Content {
         // fonctionne sur contenu supprimé ?
         const route = `contents/${this._id}`;
 
-        const response = await callApi(route);
+        const response = await requestApi(route);
         return response.ok;
     }
 
@@ -129,7 +129,7 @@ export default class Content {
      */
     async getInfos(): Promise<V4Types.Content.Infos> {
         const route = `contents/${this._id}`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 
@@ -160,7 +160,7 @@ export default class Content {
      * @param {{ raw?: boolean, paging?: V4Types.Request.Paging, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Content.Comments.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link ContentComment})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -178,7 +178,7 @@ export default class Content {
      * @param {{ page: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Content.Comments.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link ContentComment})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -234,7 +234,7 @@ export default class Content {
      * @param {{ raw?: boolean, paging?: V4Types.Request.Paging, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -252,7 +252,7 @@ export default class Content {
      * @param {{ page: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -294,7 +294,7 @@ export default class Content {
      * @param {{ raw?: boolean, paging?: V4Types.Request.Paging, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -312,7 +312,7 @@ export default class Content {
      * @param {{ page: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -354,7 +354,7 @@ export default class Content {
      * @param {{ raw?: boolean, paging?: V4Types.Request.Paging, perPage?: number }} [options]
      * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
      * @param {boolean} [options.raw]  `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -372,7 +372,7 @@ export default class Content {
      * @param {{ page: number, raw?: boolean, perPage?: number }} options
      * @param {number} options.page numéro de la page à traiter
      * @param {boolean} [options.raw]  `true` pour renvoyer un objet JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
-     * @param {number} [options.perPage] nombre d'entités par page, par défaut 20
+     * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @example
      * ```ts
      * const content = new Content(1);
@@ -416,7 +416,7 @@ export class Video extends Content {
     async doesContentExist(): Promise<boolean> {
         const route = `videos/${this._id}`;
 
-        const response = await callApi(route);
+        const response = await requestApi(route);
         return response.ok;
     }
 
@@ -428,7 +428,7 @@ export class Video extends Content {
      */
     async getInfos(): Promise<V4Types.Video.Infos> {
         const route = `videos/${this._id}`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 

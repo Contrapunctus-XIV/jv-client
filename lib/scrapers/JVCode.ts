@@ -5,7 +5,7 @@
 import { load } from 'cheerio';
 import { JVCODE_URL, SELECTORS, SMILEY_URL } from '../vars.js';
 import { decodeJvCare } from '../utils.js';
-import { curl } from '../requests.js';
+import { request } from '../requests.js';
 
 // booléen à true = supprimer l'élément
 const TAGS: { [key: string]: [[string, string], boolean] } = {
@@ -174,7 +174,7 @@ export default abstract class JVCode {
      */
     public static async jvCodeToHtml(markup: string): Promise<string> {
         throw new Error("This method is deprecated since v0.2.0.");
-        const response = await curl(JVCODE_URL, { method: "POST", data: { texte: markup }, headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+        const response = await request(JVCODE_URL, { method: "POST", data: { texte: markup }, bodyMode: "url" });
         return await response.text();
     }
 }

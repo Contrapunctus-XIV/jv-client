@@ -3,7 +3,7 @@
  */
 
 import { InexistentContent } from "../errors.js";
-import { callApi } from "../requests.js";
+import { requestApi } from "../requests.js";
 import { checkInteger } from "../utils.js";
 import { HTTP_CODES } from "../vars.js";
 import Content from "./Content.js";
@@ -71,7 +71,7 @@ export default class ContentComment {
      */
     async doesCommentExist(): Promise<boolean> {
         const route = `contents/${this._contentId}/comments/${this._id}`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         try {
             const data = await response.json();
@@ -93,7 +93,7 @@ export default class ContentComment {
     async getInfos(): Promise<V4Types.Content.Comment.Infos> {
         const route = `contents/${this._contentId}/comments/${this._id}`;
 
-        const response = await callApi(route);
+        const response = await requestApi(route);
         this._rejectIfInexistent(response);
         const data = await response.json() as V4Types.Content.Comment.Infos;
 
@@ -119,7 +119,7 @@ export default class ContentComment {
     async getAnswers({ raw = false }: { raw?: boolean } = {}): Promise<ContentComment[] | V4Types.Content.Comment.RawAnswers> {
         const route = `contents/${this._contentId}/comments/${this._id}/answers`;
         
-        const response = await callApi(route);
+        const response = await requestApi(route);
         this._rejectIfInexistent(response);
         const data = await response.json() as V4Types.Content.Comment.RawAnswers;
 

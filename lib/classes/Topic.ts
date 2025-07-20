@@ -3,7 +3,7 @@
  */
 
 import { InexistentContent } from "../errors.js";
-import { curl } from "../requests.js";
+import { request } from "../requests.js";
 import { API_DOMAIN, DOMAIN, FORUMS_PAGE, HTTP_CODES, POLL_SELECTORS, SECOND_DELAY, TOPIC_POST_SELECTORS, TOPIC_SELECTORS, URL_PLACEHOLDER } from "../vars.js";
 import Forum from "./Forum.js";
 import { load } from "cheerio";
@@ -88,7 +88,7 @@ export default class Topic {
      * @returns  {Promise<Forum>}
      */
     async getForum(): Promise<Forum> {
-        const response = await curl(this._api_url);
+        const response = await request(this._api_url, { curl: true });
         this._rejectIfInexistent(response);
         
         return new Forum(Forum._getIdFromURL(response.url));
@@ -100,7 +100,7 @@ export default class Topic {
      * @returns  {Promise<boolean>}
      */
     async doesTopicExist(): Promise<boolean> {
-        const response = await curl(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.GONE] });
+        const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.GONE], curl: true });
         
         return response.ok;
     }
@@ -113,7 +113,7 @@ export default class Topic {
      * @returns  {Promise<string>}
      */
     async getRealURL(api: boolean = false): Promise<string> {
-        const response = await curl(this._api_url);
+        const response = await request(this._api_url, { curl: true });
         this._rejectIfInexistent(response);
 
         return api ? response.url : response.url.replace(API_DOMAIN, DOMAIN);
@@ -126,7 +126,7 @@ export default class Topic {
      * @returns  {Promise<JVCTypes.Topic.Infos>}
      */
     async getInfos(): Promise<JVCTypes.Topic.Infos> {
-        const response = await curl(this._api_url);
+        const response = await request(this._api_url, { curl: true });
         this._rejectIfInexistent(response);
 
         const $ = load(await response.text());
@@ -163,7 +163,7 @@ export default class Topic {
             pollData.answers = pollAnswers;
         }
 
-        const lastPage = await curl(this.setUrlPage(nbPages, this._api_url));
+        const lastPage = await request(this.setUrlPage(nbPages, this._api_url), { curl: true });
         const $2 = load(await lastPage.text());
         const lastAnswerDate = convertJVCStringToDate($2(TOPIC_SELECTORS["publicationDate"]).last().text().trim())!;
         
@@ -187,7 +187,7 @@ export default class Topic {
      * @returns  {Promise<number>}
      */
     async getConnected(): Promise<number> {
-        const response = await curl(this._url);
+        const response = await request(this._url, { curl: true });
         this._rejectIfInexistent(response);
         const $ = load(await response.text());
 
@@ -227,7 +227,7 @@ export default class Topic {
     private readPage(page: number, options?: { raw?: boolean }): Promise<Post[]>;
     private async readPage(page: number, { raw = false } = {}): Promise<JVCTypes.Topic.Post[] | Post[]> {
         const url = this.setUrlPage(page, this._api_url);
-        const response = await curl(url);
+        const response = await request(url, { curl: true });
 
         this._rejectIfInexistent(response);
 
@@ -343,7 +343,7 @@ export default class Topic {
 
         while (true) {
             const url = this.setUrlPage(current, this._api_url);
-            const response = await curl(url);
+            const response = await request(url, { curl: true });
             this._rejectIfInexistent(response);
 
             const $ = load(await response.text());
@@ -373,7 +373,7 @@ export default class Topic {
      * @returns  {Promise<Post>}
      */
     async getFirstPost(): Promise<Post> {
-        const response = await curl(this._api_url);
+        const response = await request(this._api_url, { curl: true });
         this._rejectIfInexistent(response);
 
         const $ = load(await response.text());

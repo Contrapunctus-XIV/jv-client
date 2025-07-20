@@ -2,7 +2,7 @@
  * @module classes
  */
 
-import { callApi } from '../requests.js';
+import { requestApi } from '../requests.js';
 import { InexistentContent } from "../errors.js";
 import Game from "./Game.js";
 import Forum from "./Forum.js";
@@ -60,7 +60,7 @@ export default class Account {
      */
     async doesAccountExist(): Promise<boolean> {
         const route = `accounts/${this._id}/profile`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         return response.ok;
     }
@@ -73,7 +73,7 @@ export default class Account {
      */
     async getInfos(): Promise<V4Types.Account.Infos> {
         const route = `accounts/${this._id}/profile`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 
@@ -99,7 +99,7 @@ export default class Account {
     getPage(options?: { raw?: boolean }): Promise<V4Types.Account.Page.Default | V4Types.Account.Page.Raw>;
     async getPage({ raw = false } = {}): Promise<V4Types.Account.Page.Default | V4Types.Account.Page.Raw> {
         const route = `accounts/${this._id}/page`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 
@@ -129,7 +129,7 @@ export default class Account {
     getFavorites(options?: { raw?: boolean }): Promise<V4Types.Account.Favorites.Default | V4Types.Account.Favorites.Raw>;
     async getFavorites({ raw = false } = {}): Promise<V4Types.Account.Favorites.Default | V4Types.Account.Favorites.Raw> {
         const route = `accounts/${this._id}/favorites`;
-        const response = await callApi(route);
+        const response = await requestApi(route);
 
         this._rejectIfInexistent(response);
 
@@ -151,7 +151,7 @@ export default class Account {
      */
     private async getCurrentReport(client: Client): Promise<V4Types.Account.Reports> {
         const route = `accounts/${this._id}/report`;
-        const response = await callApi(route, { cookies: client.session });
+        const response = await requestApi(route, { cookies: client.session });
 
         this._rejectIfInexistent(response);
 
