@@ -1,6 +1,6 @@
 {
   "name": "jv-client",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "scripts": {
