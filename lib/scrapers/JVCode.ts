@@ -6,6 +6,7 @@ import { load } from 'cheerio';
 import { JVCODE_URL, SELECTORS, SMILEY_URL } from '../vars.js';
 import { decodeJvCare } from '../utils.js';
 import { request } from '../requests.js';
+import { LibTypes } from '../types/index.js';
 
 // booléen à true = supprimer l'élément
 const TAGS: { [key: string]: [[string, string], boolean] } = {
@@ -13,11 +14,13 @@ const TAGS: { [key: string]: [[string, string], boolean] } = {
     "em": [["''", "''"], false],
     "strong": [["'''", "'''"], false],
     "span.bloc-spoil-jv.en-ligne": [["", ""], false],
+    "div.bloc-spoil-jv": [["", ""], false],
     "input": [["", ""], true],
     "label": [["", ""], true],
     "button": [["", ""], true],
-    "pre": [["<br><br>", "<br><br>"], false],
+    "pre": [["<br>", "<br>"], false],
     "div.contenu-spoil": [["<spoil>","</spoil>"], false],
+    "span.contenu-spoil": [["<spoil>","</spoil>"], false],
     "div.nested-quote-toggle-box": [["", ""], true],
     "div": [["", ""], false]
 };
@@ -32,11 +35,12 @@ export default abstract class JVCode {
     private static addBreaks(markup: string): string {
         let output = markup
             .replace(/<br\/?>/g, '\n')
-            .replace(/<\/?(ul|ol)>/g, '\n\n')
-            .replace(/<\/li([\*|#]+?)>/g, '\n')
-            .replace(/<li([\*|#]+?)>/g, '$1 ')
-            .replace(/<\/p><p>/g, '\n\n')
-            .replace(/<\/?p>/g, '')
+            .replace(/<\/?(ul|ol)>/g, '\n')
+            .replace(/<\/li([\*|#]+?)>/g, '')
+            .replace(/<li([\*|#]+?)>/g, '\n$1 ')
+            .replace("<spoil><p>", "<spoil>")
+            .replace("</p></spoil>", "</spoil>")
+            .replace(/<\/?p>/g, '\n\n')
             .replace(/<q>/g, '\n\n<q>')
             .replace(/<\/q>/g, '</q>\n\n')
             .replace(/(\n{3,})/g, '\n\n')
@@ -78,7 +82,7 @@ export default abstract class JVCode {
 
     private static replaceSmileys(markup: string): string {
         const $ = load(markup);
-        const smileys = $("img").filter((i, x) => $(x).attr("src")!.startsWith(SMILEY_URL));
+        const smileys = $("img").filter((i, x) => $(x).attr("src")!.startsWith(SMILEY_URL) || $(x).hasClass("img-stickers"));
         smileys.get().forEach(x => $(x).replaceWith($(x).attr("alt") || ""));
 
         return $("body").html()!;
@@ -96,34 +100,39 @@ export default abstract class JVCode {
             });
         }
 
-        function replaceLists(parent: cheerio.Cheerio, suffix: string = ''): boolean {
-            const lists = { ol: "#", ul: "*" };
-            let hasNestedList = false;
+        function replaceLists(parent: cheerio.Cheerio, suffix: string = "") {
+            const listsTypes = [["ol", "#"], ["ul", "*"]];
 
-            for (const [selector, indicator] of Object.entries(lists)) { // itérations sur les types de liste
-                const childrenList = parent.find(selector); // recherche des listes du type contenu dans l'élement parent
+            for (let i = 0; i < listsTypes.length; i++) { // itération sur les types de liste
+                const [selector, indicator] = listsTypes[i];
+                // recherche des listes du type contenu dans l'élement parent
+                // on recherche toujours les ul et ol les plus en surface, les imbriqués seront traités par récursivité
+                const lists = suffix.length === 0 ? parent.find(`${selector}:not(${selector} ${selector}):not(${listsTypes[1-i][0]} ${selector})`) : parent.children(selector);
+                const newSuffix = suffix + indicator;
+                lists.each((_, list) => {
+                    const listObject = $(list);
+                    const lis = listObject.children("li");
 
-                childrenList.each((_: number, child: cheerio.Element) => { // pour chaque liste du type trouvée
-                    hasNestedList = true;
-
-                    const Child = $(child);
-                    const childrenLi = Child.find('li');
-                    const newSuffix = suffix.length === 0 || suffix.slice(-1) === indicator ? suffix + indicator : suffix + '' + indicator; // cette str résume l'arborescence des listes jusqu'à la cible
-
-                    childrenLi.each((_: number, li: cheerio.Element) => { // pour chaque li de cette liste
-                        const Li = $(li);
-                        const doesChildHaveNestedList = replaceLists(Li, newSuffix); // appel récursif en incrémentant la profondeur du type de la liste trouvée
-                        Li.replaceWith(doesChildHaveNestedList ? `${Li.html()}` : `<li${newSuffix}>${Li.html()}</li${newSuffix}>`); // nouveau tag indiquant la profondeur
+                    // itération sur les li de la liste
+                    lis.each((_, li) => {
+                        const liObject = $(li);
+                        replaceLists(liObject, newSuffix); // appel récursif
+                        // si texte en surface vide, alors pas besoin de balise intermédiaire
+                        if (liObject.clone().children().remove().end().text().trim().length === 0) {
+                            liObject.replaceWith(liObject.html()!);
+                        } else {
+                            liObject.replaceWith(`<li${newSuffix}>${liObject.html()}</li${newSuffix}>`);
+                        }
                     });
-                    if (suffix.length > 0) {
-                        childrenList.replaceWith(`${childrenList.html()}`); // destruction des ol et ul intérieurs
-                    } else {
-                        childrenList.removeAttr("class");
-                    }
-                })
-            }
 
-            return hasNestedList;
+                    listObject.removeAttr("class");
+
+                    // retrait des ol et ul intermédiaires
+                    if (suffix.length > 0) {
+                        listObject.replaceWith(listObject.html()!);
+                    }
+                });
+            }
         }
 
         replaceBlockquotes($.root());
@@ -149,11 +158,11 @@ export default abstract class JVCode {
      * Renvoie la chaîne de caractères JVCode correspondant au HTML passé en entrée.
      *
      * @param {string} markup HTML
-     * @param {{ replaceQTags?: boolean }} [options]
-     * @param {boolean} [options.replaceQTags] `true` pour délimiter les citations par le tag `q`, `false` (par défaut) pour laisser la notation usuelle qui utilise des chevrons.
+     * @param {LibTypes.Args.JVCode.ReplaceQTags} [options]
+     * @param {boolean} [options.replaceQTags] `true` pour délimiter les citations par le tag `q`, `false` (par défaut) pour laisser la notation usuelle qui utilise des chevrons
      * @returns  {string}
      */
-    public static htmlToJVCode(markup: string, { replaceQTags = true }: { replaceQTags?: boolean } = {}): string {
+    public static htmlToJVCode(markup: string, { replaceQTags = true }: LibTypes.Args.JVCode.ReplaceQTags = {}): string {
         markup = JVCode.replaceTags(markup);
         markup = JVCode.replaceLinks(markup);
         markup = JVCode.replaceSmileys(markup);
@@ -172,8 +181,7 @@ export default abstract class JVCode {
      * @param {string} markup chaîne de caractères JVCode
      * @returns  {Promise<string>}
      */
-    public static async jvCodeToHtml(markup: string): Promise<string> {
-        throw new Error("This method is deprecated since v0.2.0.");
+    private static async jvCodeToHtml(markup: string): Promise<string> {
         const response = await request(JVCODE_URL, { method: "POST", data: { texte: markup }, bodyMode: "url" });
         return await response.text();
     }

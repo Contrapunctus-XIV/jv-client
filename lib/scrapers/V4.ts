@@ -6,17 +6,17 @@ import { requestApi } from "../requests.js";
 import Content, { Video } from "../classes/Content.js";
 import Game from "../classes/Game.js";
 import { DEFAULT_PER_PAGE } from "../vars.js";
-import { V4Types } from "../types/index.js";
+import { LibTypes, V4Types } from "../types/index.js";
 
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true, type: "video" }): AsyncGenerator<V4Types.Videos.Raw, void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true, type: "game" }): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true, type: "hightech" }): AsyncGenerator<V4Types.Contents.RawHighTech, void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { type: "video" }): AsyncGenerator<Video[], void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { type: "game" }): AsyncGenerator<Game[], void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options: V4Types.Request.RequestOptions & { type: "hightech" }): AsyncGenerator<V4Types.Contents.HighTech, void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, options?: V4Types.Request.RequestOptions): AsyncGenerator<Content[], void, unknown>;
-function generator(route: string, paging: V4Types.Request.Paging, { query = {}, raw = false, type = "content" }: V4Types.Request.RequestOptions = {}) {
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"video">>): AsyncGenerator<V4Types.Videos.Raw, void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"game">>): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"hightech">>): AsyncGenerator<V4Types.Contents.RawHighTech, void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"video">>): AsyncGenerator<Video[], void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"game">>): AsyncGenerator<Game[], void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"hightech">>): AsyncGenerator<V4Types.Contents.HighTech, void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, options?: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions>): AsyncGenerator<Content[], void, unknown>;
+function generator(route: string, paging: LibTypes.Args.Pagination, { query = {}, raw = false, type = "content" }: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions> = {}) {
     return (async function* () {
         const { begin = 1, end = null, step = 1 } = paging;
         let current = begin;
@@ -37,15 +37,15 @@ function generator(route: string, paging: V4Types.Request.Paging, { query = {}, 
     })();
 }
 
-function request(route: string, options: V4Types.Request.RequestOptions & { raw: true, type: "video" }): Promise<V4Types.Videos.Raw>;
-function request(route: string, options: V4Types.Request.RequestOptions & { raw: true, type: "game" }): Promise<V4Types.Games.Raw>;
-function request(route: string, options: V4Types.Request.RequestOptions & { raw: true, type: "hightech" }): Promise<V4Types.Contents.RawHighTech>;
-function request(route: string, options: V4Types.Request.RequestOptions & { raw: true }): Promise<V4Types.Contents.Raw>;
-function request(route: string, options: V4Types.Request.RequestOptions & { type: "video" }): Promise<Video[]>;
-function request(route: string, options: V4Types.Request.RequestOptions & { type: "game" }): Promise<Game[]>;
-function request(route: string, options: V4Types.Request.RequestOptions & { type: "hightech" }): Promise<V4Types.Contents.HighTech>;
-function request(route: string, options?: V4Types.Request.RequestOptions): Promise<Content[]>;
-function request(route: string, { query = {}, raw = false, type = "content" }: V4Types.Request.RequestOptions = {}) {
+function request(route: string, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"video">>): Promise<V4Types.Videos.Raw>;
+function request(route: string, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"game">>): Promise<V4Types.Games.Raw>;
+function request(route: string, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions<"hightech">>): Promise<V4Types.Contents.RawHighTech>;
+function request(route: string, options: LibTypes.Args.Raw<LibTypes.Args.V4.RequestOptions>): Promise<V4Types.Contents.Raw>;
+function request(route: string, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"video">>): Promise<Video[]>;
+function request(route: string, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"game">>): Promise<Game[]>;
+function request(route: string, options: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions<"hightech">>): Promise<V4Types.Contents.HighTech>;
+function request(route: string, options?: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions>): Promise<Content[]>;
+function request(route: string, { query = {}, raw = false, type = "content" }: LibTypes.Args.NotRaw<LibTypes.Args.V4.RequestOptions> = {}) {
     return requestApi(route, { query })
         .then(response => response.json())
         .then(data => {
@@ -73,19 +73,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getContents(options: V4Types.Request.ContentsOptions & { page: number, raw: true }): Promise<V4Types.Contents.Raw>;
+    static getContents(options: LibTypes.Args.RawAndPage<LibTypes.Args.V4.ContentsOptions>): Promise<V4Types.Contents.Raw>;
     /**
      * @hidden
      */
-    static getContents(options: V4Types.Request.ContentsOptions & { page: number }): Promise<Content[]>;
+    static getContents(options: LibTypes.Args.Page<LibTypes.Args.V4.ContentsOptions>): Promise<Content[]>;
     /**
      * @hidden
      */
-    static getContents(options: V4Types.Request.ContentsOptions & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+    static getContents(options: LibTypes.Args.RawAndPaging<LibTypes.Args.V4.ContentsOptions>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static getContents(options?: V4Types.Request.ContentsOptions): AsyncGenerator<Content[], void, unknown>;
+    static getContents(options?: LibTypes.Args.Paging<LibTypes.Args.V4.ContentsOptions>): AsyncGenerator<Content[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des contenus (actualités, articles, wikis...) situés aux pages décrites par le paramètre `paging` et satisfaisant au `query` donné.
      * 
@@ -95,14 +95,14 @@ export default abstract class V4 {
      *      console.log(page);
      * }
      * ```
-     * @param {{ paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.ContentsQuery, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {LibTypes.Args.Paging<LibTypes.Args.V4.ContentsOptions>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {V4Types.Request.ContentsQuery} [options.query] à renseigner pour affiner la recherche
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)}
      */
-    static getContents(options?: { paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.ContentsQuery, perPage?: number }): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
+    static getContents(options?: LibTypes.Args.Paging<LibTypes.Args.V4.ContentsOptions>): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
     /**
      * Renvoie les contenus (actualités, articles, wikis...) situés à une page particulière et satisfaisant au `query` donné.
      *
@@ -110,15 +110,15 @@ export default abstract class V4 {
      * ```ts
      * console.log(await V4.getContents({ page: 2 }));
      * ```
-     * @param {{ page: number, raw?: boolean, query?: V4Types.Request.ContentsQuery, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.V4.ContentsOptions>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {V4Types.Request.ContentsQuery} [options.query] à renseigner pour affiner la recherche
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Content[] | V4Types.Contents.Raw>)}
      */
-    static getContents(options: { page: number, raw?: boolean, query?: V4Types.Request.ContentsQuery, perPage?: number }): Promise<Content[] | V4Types.Contents.Raw>;
-    static getContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: V4Types.Request.ContentsOptions = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static getContents(options: LibTypes.Args.Page<LibTypes.Args.V4.ContentsOptions>): Promise<Content[] | V4Types.Contents.Raw>;
+    static getContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: LibTypes.Args.PageOrPaging<LibTypes.Args.V4.ContentsOptions> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'contents';
     
         if (page !== undefined) {
@@ -131,19 +131,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getHighTechContents(options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Contents.RawHighTech>;
+    static getHighTechContents(options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Contents.RawHighTech>;
     /**
      * @hidden
      */
-    static getHighTechContents(options: V4Types.Request.Options & { page: number }): Promise<V4Types.Contents.HighTech>;
+    static getHighTechContents(options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<V4Types.Contents.HighTech>;
     /**
      * @hidden
      */
-    static getHighTechContents(options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Contents.RawHighTech, void, unknown>;
+    static getHighTechContents(options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.RawHighTech, void, unknown>;
     /**
      * @hidden
      */
-    static getHighTechContents(options?: V4Types.Request.Options): AsyncGenerator<V4Types.Contents.HighTech, void, unknown>;
+    static getHighTechContents(options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.HighTech, void, unknown>;
     /**
      * Renvoie un générateur asynchrone des contenus high-tech situés aux pages décrites par le paramètre `paging`.
      * 
@@ -154,13 +154,13 @@ export default abstract class V4 {
      * }
      * ```
      * 
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.RawHighTech}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Contents.HighTech})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.RawHighTech | `V4Types.Contents.RawHighTech`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Contents.HighTech | `V4Types.Contents.HighTech`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech, void, unknown>)}
      */
-    static getHighTechContents(options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech, void, unknown>;
+    static getHighTechContents(options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech, void, unknown>;
     /**
      * Renvoie les contenus high-tech situés à une page particulière.
      * 
@@ -169,14 +169,14 @@ export default abstract class V4 {
      * console.log(await V4.getHighTechContents({ page: 2 }));
      * ```
      * 
-     * @param  {{ page: number, raw?: boolean, perPage?: number }} options 
+     * @param  {LibTypes.Args.Page<LibTypes.Args.Base>} options 
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.RawHighTech}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Contents.HighTech})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.RawHighTech | `V4Types.Contents.RawHighTech`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Contents.HighTech | `V4Types.Contents.HighTech`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech>)} 
      */
-    static getHighTechContents(options: { page: number, raw?: boolean, perPage?: number }): Promise<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech>;
-    static getHighTechContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static getHighTechContents(options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<V4Types.Contents.HighTech | V4Types.Contents.RawHighTech>;
+    static getHighTechContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'contents/hightech';
     
         if (page !== undefined) {
@@ -189,19 +189,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getTrendingContents(options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Contents.Raw>;
+    static getTrendingContents(options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Contents.Raw>;
     /**
      * @hidden
      */
-    static getTrendingContents(options: V4Types.Request.Options & { page: number }): Promise<Content[]>;
+    static getTrendingContents(options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[]>;
     /**
      * @hidden
      */
-    static getTrendingContents(options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+    static getTrendingContents(options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static getTrendingContents(options?: V4Types.Request.Options): AsyncGenerator<Content[], void, unknown>;
+    static getTrendingContents(options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des contenus tendance situés aux pages décrites par le paramètre `paging`.
      * 
@@ -212,13 +212,13 @@ export default abstract class V4 {
      * }
      * ```
      * 
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {boolean} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)}
      */
-    static getTrendingContents(options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
+    static getTrendingContents(options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
     /**
      * Renvoie les contenus tendance situés à une page particulière.
      * 
@@ -227,14 +227,14 @@ export default abstract class V4 {
      * console.log(await V4.getTrendingContents({ page: 2 }));
      * ```
      * 
-     * @param  {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param  {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {boolean} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Content[] | V4Types.Contents.Raw>)} 
      */
-    static getTrendingContents(options: { page: number, raw?: boolean, perPage?: number }): Promise<Content[] | V4Types.Contents.Raw>;
-    static getTrendingContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static getTrendingContents(options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[] | V4Types.Contents.Raw>;
+    static getTrendingContents({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'contents/trending';
     
         if (page !== undefined) {
@@ -247,20 +247,20 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getGamesSummary(options: { raw?: true }): Promise<V4Types.Games.RawSummary>;
+    static getGamesSummary(options: LibTypes.Args.Raw): Promise<V4Types.Games.RawSummary>;
     /**
      * @hidden
      */
-    static getGamesSummary(options?: { raw?: boolean }): Promise<V4Types.Games.Summary>;
+    static getGamesSummary(options?: LibTypes.Args.NotRaw): Promise<V4Types.Games.Summary>;
     /**
      * Renvoie un sommaire contenant les contenus du moment portant sur des jeux vidéo.
      * 
-     * @param  {{ raw?: boolean }} [options]
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.RawSummary}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Games.Summary})
+     * @param  {LibTypes.Args.NotRaw} [options]
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.RawSummary | `V4Types.Games.RawSummary`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link V4Types.Games.Summary | `V4Types.Games.Summary`})
      * @returns {(Promise<V4Types.Games.Summary | V4Types.Games.RawSummary>)}
      */
-    static getGamesSummary(options?: { raw?: boolean }): Promise<V4Types.Games.Summary | V4Types.Games.RawSummary>;
-    static async getGamesSummary({ raw = false }: { raw?: boolean } = {}) {
+    static getGamesSummary(options?: LibTypes.Args.NotRaw): Promise<V4Types.Games.Summary | V4Types.Games.RawSummary>;
+    static async getGamesSummary({ raw = false }: LibTypes.Args.NotRaw = {}) {
         const route = 'contents/games';
     
         const response = await requestApi(route);
@@ -289,19 +289,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getGames(options: V4Types.Request.GamesOptions & { page: number, raw: true }): Promise<V4Types.Games.Raw>;
+    static getGames(options: LibTypes.Args.RawAndPage<LibTypes.Args.V4.GamesOptions>): Promise<V4Types.Games.Raw>;
     /**
      * @hidden
      */
-    static getGames(options: V4Types.Request.GamesOptions & { page: number }): Promise<Game[]>;
+    static getGames(options: LibTypes.Args.Page<LibTypes.Args.V4.GamesOptions>): Promise<Game[]>;
     /**
      * @hidden
      */
-    static getGames(options: V4Types.Request.GamesOptions & { raw: true }): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
+    static getGames(options: LibTypes.Args.RawAndPaging<LibTypes.Args.V4.GamesOptions>): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static getGames(options?: V4Types.Request.GamesOptions): AsyncGenerator<Game[], void, unknown>;
+    static getGames(options?: LibTypes.Args.Paging<LibTypes.Args.V4.GamesOptions>): AsyncGenerator<Game[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des jeux vidéo situés aux pages décrites par le paramètre `paging` et satisfaisant au `query` donné.
      * 
@@ -312,14 +312,14 @@ export default abstract class V4 {
      * }
      * ```
      * 
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.GamesQuery, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.V4.GamesOptions>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {V4Types.Request.ContentsQuery} [options.query] à renseigner pour affiner la recherche
      * @returns {(AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>)} 
      */
-    static getGames(options?: { paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.GamesQuery, perPage?: number }): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
+    static getGames(options?: LibTypes.Args.Paging<LibTypes.Args.V4.GamesOptions>): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
     /**
      * Renvoie les jeux vidéo situés à une page particulière et satisfaisant au `query` donné.
      *
@@ -328,15 +328,15 @@ export default abstract class V4 {
      * console.log(await V4.getGames({ page: 2 }));
      * ```
      * 
-     * @param  {{ page: number, raw?: boolean, query?: V4Types.Request.GamesQuery, perPage?: number }} options 
+     * @param  {LibTypes.Args.Page<LibTypes.Args.V4.GamesOptions>} options 
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {V4Types.Request.GamesQuery} [options.query] à renseigner pour affiner la recherche
      * @returns {(AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>)} 
      */
-    static getGames(options: { page: number, raw?: boolean, query?: V4Types.Request.GamesQuery, perPage?: number }): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
-    static getGames({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: V4Types.Request.GamesOptions = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static getGames(options: LibTypes.Args.Page<LibTypes.Args.V4.GamesOptions>): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
+    static getGames({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: LibTypes.Args.PageOrPaging<LibTypes.Args.V4.GamesOptions> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'games';
     
         if (page !== undefined) {
@@ -349,19 +349,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static getGamesReleases(options: V4Types.Request.ReleasesOptions & { page: number, raw: true }): Promise<V4Types.Games.Raw>;
+    static getGamesReleases(options: LibTypes.Args.RawAndPage<LibTypes.Args.V4.ReleasesOptions>): Promise<V4Types.Games.Raw>;
     /**
      * @hidden
      */
-    static getGamesReleases(options: V4Types.Request.ReleasesOptions & { page: number }): Promise<Game[]>;
+    static getGamesReleases(options: LibTypes.Args.Page<LibTypes.Args.V4.ReleasesOptions>): Promise<Game[]>;
     /**
      * @hidden
      */
-    static getGamesReleases(options: V4Types.Request.ReleasesOptions & { raw: true }): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
+    static getGamesReleases(options: LibTypes.Args.RawAndPaging<LibTypes.Args.V4.ReleasesOptions>): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static getGamesReleases(options?: V4Types.Request.ReleasesOptions): AsyncGenerator<Game[], void, unknown>;
+    static getGamesReleases(options?: LibTypes.Args.Paging<LibTypes.Args.V4.ReleasesOptions>): AsyncGenerator<Game[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des sorties de jeux vidéo situées aux pages décrites par le paramètre `paging` et satisfaisant au `query` donné.
      * 
@@ -372,14 +372,14 @@ export default abstract class V4 {
      * }
      * ```
      * 
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.ReleasesQuery, perPage?: number }} [options] 
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.V4.ReleasesOptions>} [options] 
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {V4Types.Request.GamesQuery} [options.query] à renseigner pour affiner la recherche
      * @returns {(AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>)}
      */
-    static getGamesReleases(options?: { paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.ReleasesQuery, perPage?: number }): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
+    static getGamesReleases(options?: LibTypes.Args.Paging<LibTypes.Args.V4.ReleasesOptions>): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
     /**
      * Renvoie les sorties de jeux vidéo situés à une page particulière et satisfaisant au `query` donné.
      * 
@@ -388,15 +388,15 @@ export default abstract class V4 {
      * console.log(await V4.getGamesReleases({ page: 2 }));
      * ```
      * 
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, query?: V4Types.Request.ReleasesQuery, perPage?: number }} [options] 
+     * @param  {LibTypes.Args.Page<LibTypes.Args.V4.ReleasesOptions>} [options] 
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @param {V4Types.Request.GamesQuery} [options.query] à renseigner pour affiner la recherche
      * @returns {(Promise<Game[] | V4Types.Games.Raw>)}
      */
-    static getGamesReleases(options: { page: number, raw?: boolean, query?: V4Types.Request.ReleasesQuery, perPage?: number }): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
-    static getGamesReleases({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: V4Types.Request.ReleasesOptions = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static getGamesReleases(options: LibTypes.Args.Page<LibTypes.Args.V4.ReleasesOptions>): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
+    static getGamesReleases({ raw = false, page, paging = {}, perPage = DEFAULT_PER_PAGE, query = {} }: LibTypes.Args.PageOrPaging<LibTypes.Args.V4.ReleasesOptions> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'games/releases';
     
         if (page !== undefined) {
@@ -409,19 +409,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static searchArticles(q: string, options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Contents.Raw>;
+    static searchArticles(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Contents.Raw>;
     /**
      * @hidden
      */
-    static searchArticles(q: string, options: V4Types.Request.Options & { page: number }): Promise<Content[]>;
+    static searchArticles(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[]>;
     /**
      * @hidden
      */
-    static searchArticles(q: string, options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+    static searchArticles(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static searchArticles(q: string, options?: V4Types.Request.Options): AsyncGenerator<Content[], void, unknown>;
+    static searchArticles(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des articles correspondant aux termes de recherche et situés aux pages décrites par le paramètre `paging`.
      * 
@@ -433,13 +433,13 @@ export default abstract class V4 {
      * ```
      * 
      * @param  {string} q termes de recherche
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)} 
      */
-    static searchArticles(q: string, options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
+    static searchArticles(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
     /**
      * Renvoie les articles correspondant aux termes de recherche et situés à une page particulière.
      * 
@@ -449,14 +449,14 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Content[] | V4Types.Contents.Raw>)} 
      */
-    static searchArticles(q: string, options: { page: number, raw?: boolean, perPage?: number }): Promise<Content[] | V4Types.Contents.Raw>;
-    static searchArticles(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static searchArticles(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[] | V4Types.Contents.Raw>;
+    static searchArticles(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'search/articles';
     
         if (page !== undefined) {
@@ -469,19 +469,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static searchGames(q: string, options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Games.Raw>;
+    static searchGames(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Games.Raw>;
     /**
      * @hidden
      */
-    static searchGames(q: string, options: V4Types.Request.Options & { page: number }): Promise<Game[]>;
+    static searchGames(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Game[]>;
     /**
      * @hidden
      */
-    static searchGames(q: string, options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
+    static searchGames(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Games.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static searchGames(q: string, options?: V4Types.Request.Options): AsyncGenerator<Game[], void, unknown>;
+    static searchGames(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Game[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des jeux correspondant aux termes de recherche et situés aux pages décrites par le paramètre `paging`.
      * 
@@ -493,13 +493,13 @@ export default abstract class V4 {
      * ```
      * 
      * @param  {string} q termes de recherche
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>)} 
      */
-    static searchGames(q: string, options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
+    static searchGames(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Game[] | V4Types.Games.Raw, void, unknown>;
     /**
      * Renvoie les jeux correspondant aux termes de recherche et situés à une page particulière.
      * 
@@ -509,14 +509,14 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Games.Raw | `V4Types.Games.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Game | `Game`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Game[] | V4Types.Games.Raw>)} 
      */
-    static searchGames(q: string, options: { page: number, raw?: boolean, perPage?: number }): Promise<Game[] | V4Types.Games.Raw>;
-    static searchGames(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static searchGames(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Game[] | V4Types.Games.Raw>;
+    static searchGames(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'search/games';
     
         if (page !== undefined) {
@@ -529,19 +529,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static searchNews(q: string, options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Contents.Raw>;
+    static searchNews(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Contents.Raw>;
     /**
      * @hidden
      */
-    static searchNews(q: string, options: V4Types.Request.Options & { page: number }): Promise<Content[]>;
+    static searchNews(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[]>;
      /**
      * @hidden
      */
-    static searchNews(q: string, options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+    static searchNews(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static searchNews(q: string, options?: V4Types.Request.Options): AsyncGenerator<Content[], void, unknown>;
+    static searchNews(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des news correspondant aux termes de recherche et situées aux pages décrites par le paramètre `paging`.
      * 
@@ -553,13 +553,13 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)} 
      */
-    static searchNews(q: string, options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
+    static searchNews(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
     /**
      * Renvoie les news correspondant aux termes de recherche et situées à une page particulière.
      * 
@@ -569,14 +569,14 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Content[] | V4Types.Contents.Raw>)} 
      */
-    static searchNews(q: string, options: { page: number, raw?: boolean, perPage?: number }): Promise<Content[] | V4Types.Contents.Raw>;
-    static searchNews(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static searchNews(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[] | V4Types.Contents.Raw>;
+    static searchNews(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'search/news';
     
         if (page !== undefined) {
@@ -589,19 +589,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static searchVideos(q: string, options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Videos.Raw>;
+    static searchVideos(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Videos.Raw>;
     /**
      * @hidden
      */
-    static searchVideos(q: string, options: V4Types.Request.Options & { page: number }): Promise<Video[]>;
+    static searchVideos(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Video[]>;
     /**
      * @hidden
      */
-    static searchVideos(q: string, options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Videos.Raw, void, unknown>;
+    static searchVideos(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Videos.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static searchVideos(q: string, options?: V4Types.Request.Options): AsyncGenerator<Video[], void, unknown>;
+    static searchVideos(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Video[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des vidéos correspondant aux termes de recherche et situées aux pages décrites par le paramètre `paging`.
      * 
@@ -613,13 +613,13 @@ export default abstract class V4 {
      * ```
      * 
      * @param  {string} q termes de recherche
-     * @param  {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
+     * @param  {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Videos.Raw | `V4Types.Videos.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Video`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Video[] | V4Types.Videos.Raw, void, unknown>)} 
      */
-    static searchVideos(q: string, options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Video[] | V4Types.Videos.Raw, void, unknown>;
+    static searchVideos(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Video[] | V4Types.Videos.Raw, void, unknown>;
     /**
      * Renvoie les vidéos correspondant aux termes de recherche et situées à une page particulière.
      * 
@@ -629,14 +629,14 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Videos.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Video})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Videos.Raw | `V4Types.Videos.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Video`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Video[] | V4Types.Videos.Raw>)} 
      */
-    static searchVideos(q: string, options: { page: number, raw?: boolean, perPage?: number }): Promise<Video[] | V4Types.Videos.Raw>;
-    static searchVideos(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static searchVideos(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Video[] | V4Types.Videos.Raw>;
+    static searchVideos(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'search/videos';
     
         if (page !== undefined) {
@@ -649,19 +649,19 @@ export default abstract class V4 {
     /**
      * @hidden
      */
-    static searchWikis(q: string, options: V4Types.Request.Options & { page: number, raw: true }): Promise<V4Types.Contents.Raw>;
+    static searchWikis(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.Base>): Promise<V4Types.Contents.Raw>;
     /**
      * @hidden
      */
-    static searchWikis(q: string, options: V4Types.Request.Options & { page: number }): Promise<Content[]>;
+    static searchWikis(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[]>;
     /**
      * @hidden
      */
-    static searchWikis(q: string, options: V4Types.Request.Options & { raw: true }): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
+    static searchWikis(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.Base>): AsyncGenerator<V4Types.Contents.Raw, void, unknown>;
     /**
      * @hidden
      */
-    static searchWikis(q: string, options?: V4Types.Request.Options): AsyncGenerator<Content[], void, unknown>;
+    static searchWikis(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des wikis correspondant aux termes de recherche et situés aux pages décrites par le paramètre `paging`.
      * 
@@ -673,13 +673,13 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }} [options]
-     * @param {V4Types.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {LibTypes.Args.Paging<LibTypes.Args.Base>} [options]
+     * @param {LibTypes.Args.Pagination} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>)} 
      */
-    static searchWikis(q: string, options?: { paging?: V4Types.Request.Paging, raw?: boolean, perPage?: number }): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
+    static searchWikis(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.Base>): AsyncGenerator<Content[] | V4Types.Contents.Raw, void, unknown>;
     /**
      * Renvoie les wikis correspondant aux termes de recherche et situés à une page particulière.
      * 
@@ -689,14 +689,14 @@ export default abstract class V4 {
      * ```
      * 
      * @param {string} q termes de recherche
-     * @param {{ page: number, raw?: boolean, perPage?: number }} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.Base>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link V4Types.Contents.Raw | `V4Types.Contents.Raw`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Content | `Content`})
      * @param {number} [options.perPage] nombre d'entités par page, par défaut `20`
      * @returns {(Promise<Content[] | V4Types.Contents.Raw>)} 
      */
-    static searchWikis(q: string, options: { page: number, raw?: boolean, perPage?: number }): Promise<Content[] | V4Types.Contents.Raw>;
-    static searchWikis(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: V4Types.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    static searchWikis(q: string, options: LibTypes.Args.Page<LibTypes.Args.Base>): Promise<Content[] | V4Types.Contents.Raw>;
+    static searchWikis(q: string, { raw = false, page = undefined, paging = {}, perPage = DEFAULT_PER_PAGE }: LibTypes.Args.PageOrPaging<LibTypes.Args.Base> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const route = 'search/wikis';
     
         if (page !== undefined) {
