@@ -1,10 +1,10 @@
 {
   "name": "jv-client",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Un client Node.js pour interagir avec le site jeuxvideo.com et son API.",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "exit 0",
+    "test": "vitest",
     "build": "tsc",
     "docs": "typedoc lib/**/* lib/index.ts --name API --readme lib/index.md --json api.json & rimraf docs & typedoc --entryPointStrategy merge api.json --alwaysCreateEntryPointModule --projectDocuments guides/quickstart.md --projectDocuments guides/scraping.md --projectDocuments guides/interact.md --projectDocuments guides/other.md --projectDocuments guides/changelog.md & rimraf api.json"
   },
@@ -31,7 +31,7 @@
   "dependencies": {
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.0.0",
-    "fs": "^0.0.1-security",
+    "dotenv": "^17.2.0",
     "sharp": "^0.34.3",
     "typescript": "^5.6.2"
   },
@@ -40,7 +40,8 @@
     "rimraf": "^6.0.1",
     "typedoc-plugin-mdn-links": "^4.0.13",
     "typedoc-plugin-merge-modules": "^6.1.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "20 || >=22"
