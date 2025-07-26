@@ -37,11 +37,11 @@ export class NotConnected extends Error {
  * @class
  * @extends Error
  */
-export class InexistentContent extends Error {
+export class NonexistentContent extends Error {
     constructor(message: string) {
         super(message);
-        this.name = "InexistentContent";
-        Object.setPrototypeOf(this, InexistentContent.prototype);
+        this.name = "NonexistentContent";
+        Object.setPrototypeOf(this, NonexistentContent.prototype);
     }
 }
 
