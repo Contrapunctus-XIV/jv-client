@@ -3,7 +3,7 @@
   "out": "./docs",
   "entryPoints": ["lib/index.ts", "lib/errors.ts"],
   //"projectDocuments": ["guides/interact.md", "guides/scraping.md"],
-  "exclude": ["lib/vars.ts"],
+  "exclude": ["lib/vars.ts", "lib/tests"],
   "plugin": ["typedoc-plugin-merge-modules", "typedoc-plugin-mdn-links"],
   "mergeModulesMergeMode": "module",
   "searchInComments": true,
