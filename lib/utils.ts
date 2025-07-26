@@ -2,7 +2,6 @@
  * @module utils
  */
 
-import * as fs from 'fs';
 import { EMOJI_REGEX, VALID_JVC_CHARACTERS, FRENCH_MONTHS_TO_NUMBER, SELECTORS, INTEGER_LIMIT } from './vars.js';
 import { ValueError } from './errors.js';
 
@@ -116,9 +115,9 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
 
     if (match) {
         const now = new Date();
-        const hours = parseInt(match[0]);
-        const minutes = parseInt(match[1]);
-        const seconds = parseInt(match[2]);
+        const hours = parseInt(match[1]);
+        const minutes = parseInt(match[2]);
+        const seconds = parseInt(match[3]);
 
         const dateUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds))
 
@@ -133,7 +132,7 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
 
 /**
  * Renvoie un lien obtenu après décodage de la classe `JvCare` passée en entrée.
- * Les `JvCare` sont un mécanisme d'obfusquation développé par JVC et destiné à masquer les liens situés sur une page HTML obtenue après une requête
+ * `JvCare` est un mécanisme d'obfusquation développé par JVC et destiné à masquer les liens situés dans une page HTML obtenue après une requête
  * effectuée avec une API comme `fetch`.
  * 
  * @example
@@ -141,7 +140,7 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
  * console.log(decodeJvCare("JvCare 1F4943CCC24843CBCB43C11F"));
  * ```
  * 
- * @param elementClass classe de l'élément, qui contient le JvCare
+ * @param elementClass classe de l'élément, qui contient le `JvCare`
  * @returns {string}
  */
 export function decodeJvCare(elementClass: string): string {
@@ -155,7 +154,7 @@ export function decodeJvCare(elementClass: string): string {
 }
 
 /**
- * Déchiffre tous les JvCare dans le document `cheerio` passé en entrée.
+ * Déchiffre tous les `JvCare` dans le document `cheerio` passé en entrée.
  * 
  * @param {cheerio.Root} $ le document `cheerio`
  */
