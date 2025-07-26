@@ -15,14 +15,14 @@ import ForumClient from "./classes/ForumClient.js";
 import Alias from "./classes/Alias.js";
 import NoelShack from "./classes/NoelShack.js";
 import { convertJVCStringToDate, decodeJvCare, isValidJVCText } from "./utils.js";
-import { requestApi, request } from "./requests.js";
+import { requestApi, request, setupCloudflare } from "./requests.js";
 
 /**
  * Contient l'ensemble de ce qui est exporté par la librairie.
  */
 const JVClient = {
     Client, Account, Profile, Forum, Content, Video, V4, NoelShack, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, loadCfClearance: setupCloudflare
 };
 
 /**
@@ -35,5 +35,5 @@ export default JVClient;
  */
 export {
     Client, Account, Profile, Forum, Content, Video, V4, ContentComment, NoelShack, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, setupCloudflare as loadCfClearance
 };

@@ -4,11 +4,27 @@
 
 import crypto from 'node:crypto';
 import { JvcResponseError } from './errors.js';
-import { API_DOMAIN, API_VERSION, HTTP_CODES, DEFAULT_REQUEST_RETRIES, SECOND_DELAY, USER_AGENT, PARTNER_KEY, HMAC_SECRET } from './vars.js';
+import { API_DOMAIN, API_VERSION, HTTP_CODES, DEFAULT_REQUEST_RETRIES, SECOND_DELAY, DEFAULT_USER_AGENT, PARTNER_KEY, HMAC_SECRET } from './vars.js';
 import { sleep } from './utils.js';
 import util from "node:util";
 import { exec as srcExec } from "node:child_process";
 import { LibTypes } from './types/index.js';
+
+let SESSION: undefined | Record<string, string> = undefined;
+let USER_AGENT: string = DEFAULT_USER_AGENT;
+
+/**
+ * Renseigne la valeur du cookie `cf_clearance` et du *user-agent* associé afin d'empêcher les services Cloudflare de bloquer les requêtes.
+ * Voir plus d'informations [ici](../guides/quickstart.md#contournement-de-cloudflare).
+ * 
+ * 
+ * @param {string} cfClearance valeur du cookie `cf_clearance` 
+ * @param {string} userAgent *user-agent*
+ */
+export function setupCloudflare(cfClearance: string, userAgent: string) {
+    SESSION = { "cf_clearance": cfClearance };
+    USER_AGENT = userAgent;
+}
 
 function normalizeHeaders(headers: Record<string, string>) {
     for (const header in headers) {
@@ -116,22 +132,7 @@ function parseData(data: any, method: LibTypes.Requests.HttpMethod, bodyMode: Li
  * Effectue une requête à l'API `v4`, à l'endpoint et avec les options spécifiées, puis renvoie la réponse obtenue.
  * 
  * @param {string} path *endpoint* (chemin relatif) auquel adresser la requête. Exemple : `accounts/login`. La liste des *endpoints* est disponible sur [JVFlux](https://jvflux.fr/Documentation_de_l%27API_Jeuxvideo.com#API_v4).
- * @param {LibTypes.Requests.Options} [options] options permettant de modifier le comportement de la requête
- * @param {LibTypes.Requests.HttpMethod} [options.method] méthode HTTP de la requête (`GET` par défaut)
- * @param {Record<string, any>} [options.query] les paramètres URL à passer à la requête, sous forme d'objet associant au paramètre sa valeur
- * @param {any} [options.data] le corps de la requête (pour méthodes `POST` et `PUT`). Son format est arbitraire est dépend du header `Content-Type` fourni : `application/json` (header par défaut), `application/x-www-form-urlencoded` et `multipart/form-data` recquièrent tous un objet. Pour tout autre header tel que `application/octet-stream`, la valeur de ce paramètre sera passée telle que donnée par l'utilisateur à la requête
- * @param {Record<string, string>} [options.cookies] les cookies à envoyer sous forme d'objet associant au nom du cookie sa valeur
- * @param {Record<string, string>} [options.headers] les en-têtes à envoyer sous forme d'objet associant au nom de l'en-tête sa valeur. Une en-tête particulièrement importante est `Content-Type` car elle déterminera la manière dont sera traitée le paramètre optionnel `data` (voir ci-dessus)
- * @param {number[]} [options.allowedStatusErrors] contient les statuts HTTP signalant un échec à ignorer, c'est-à-dire ceux qui ne causeront pas l'erreur {@link errors.JvcResponseError | JvcResponseError} si renvoyés. Contient par défaut les statuts 400 (`Bad Request`) et 404 (`Not Found`)
- * @throws {@link errors.JvcResponseError | JvcResponseError} si un statut HTTP signalant un échec a été rencontré et qu'il n'est pas listé dans `allowedStatusErrors`
- * 
- */
-
-/**
- * Effectue une requête à l'API `v4`, à l'endpoint et avec les options spécifiées, puis renvoie la réponse obtenue.
- * 
- * @param {string} path *endpoint* (chemin relatif) auquel adresser la requête. Exemple : `accounts/login`. La liste des *endpoints* est disponible sur [JVFlux](https://jvflux.fr/Documentation_de_l%27API_Jeuxvideo.com#API_v4).
- * @param {LibTypes.Requests.Options} [options] options permettant de modifier le comportement de la requête
+ * @param {LibTypes.Requests.RequestApiOptions} [options] options permettant de modifier le comportement de la requête
  * @param {LibTypes.Requests.HttpMethod} [options.method] méthode HTTP de la requête (`"GET"` par défaut)
  * @param {Record<string, any>} [options.query] les paramètres URL à passer à la requête, sous forme d'objet associant au paramètre sa valeur
  * @param {LibTypes.Requests.BodyType} [options.data] le corps de la requête (pour méthodes `POST` et `PUT`). Doit être un objet sauf si `bodyMode` vaut `"any"`.
@@ -139,13 +140,13 @@ function parseData(data: any, method: LibTypes.Requests.HttpMethod, bodyMode: Li
  * @param {Record<string, string>} [options.cookies] les cookies à envoyer sous forme d'objet associant au nom du cookie sa valeur
  * @param {Record<string, string>} [options.headers] les en-têtes à envoyer sous forme d'objet associant au nom de l'en-tête sa valeur
  * @param {number} [options.retries] nombre maximal de tentatives d'envoi de la requête au cas où une erreur `429 Too Many Requests` se produit (par défaut `3`)
- * @param {number} [options.retryDelay] délai entre chaque tentative en millisecondes (par défaut `1 000`)
+ * @param {number} [options.retryDelay] délai entre chaque tentative en millisecondes (par défaut `2 000`)
  * @param {number[]} [options.allowedStatusErrors] contient les statuts HTTP signalant un échec à ignorer, c'est-à-dire ceux qui ne causeront pas l'erreur {@link errors.JvcResponseError | JvcResponseError} si renvoyés. Contient par défaut les statuts 400 (`Bad Request`) et 404 (`Not Found`)
- * @throws {@link errors.JvcResponseError | JvcResponseError} si un statut HTTP signalant un échec a été rencontré et qu'il n'est pas listé dans `allowedStatusErrors`
+ * @throws {@link errors.JvcResponseError | `JvcResponseError`} si un statut HTTP signalant un échec a été rencontré et qu'il n'est pas listé dans `allowedStatusErrors`
  * 
  * @returns 
  */
-export async function requestApi(path: string, { method = 'GET', query = {}, data = undefined, cookies = {}, headers = {}, allowedStatusErrors = [HTTP_CODES.BAD_REQUEST, HTTP_CODES.NOT_FOUND], bodyMode = "json", retries = DEFAULT_REQUEST_RETRIES, retryDelay = SECOND_DELAY }: { method?: LibTypes.Requests.HttpMethod; query?: Record<string, any>; data?: LibTypes.Requests.BodyType; cookies?: Record<string, string>; headers?: Record<string, string>; allowedStatusErrors?: number[]; bodyMode?: LibTypes.Requests.BodyMode; retries?: number; retryDelay?: number } = {}): Promise<Response> {
+export async function requestApi(path: string, { method = 'GET', query = {}, data = undefined, cookies = {}, headers = {}, allowedStatusErrors = [HTTP_CODES.BAD_REQUEST, HTTP_CODES.NOT_FOUND], bodyMode = "json", retries = DEFAULT_REQUEST_RETRIES, retryDelay = 2*SECOND_DELAY }: LibTypes.Args.Requests.RequestApiOptions = {}): Promise<Response> {
     const url = `https://${API_DOMAIN}/v${API_VERSION}/${path}`;
     const jvAuth = authHeader(path, method, query);
     const reqHeaders = {
@@ -156,7 +157,7 @@ export async function requestApi(path: string, { method = 'GET', query = {}, dat
         "User-Agent": "JeuxVideo-Android/338",
         "Host": API_DOMAIN
     };
-    
+        
     return request(url, { method, query, headers: reqHeaders, data, cookies, allowedStatusErrors, bodyMode, curl: false, retries, retryDelay })
 }
 
@@ -260,7 +261,7 @@ function convertCurlIntoResponse(stdout: string): Response {
  * Effectue une requête à l'URL passée en entrée et avec les options spécifiées puis renvoie la réponse obtenue.
  * 
  * @param {string | URL} url URL de la requête
- * @param {LibTypes.Requests.Options} [options] options permettant de modifier le comportement de la requête
+ * @param {LibTypes.Requests.RequestOptions} [options] options permettant de modifier le comportement de la requête
  * @param {LibTypes.Requests.HttpMethod} [options.method] méthode HTTP de la requête (`"GET"` par défaut)
  * @param {Record<string, any>} [options.query] les paramètres URL à passer à la requête, sous forme d'objet associant au paramètre sa valeur
  * @param {any} [options.data] le corps de la requête (pour méthodes `POST` et `PUT`). Doit être un objet sauf si `bodyMode` vaut `"any"`.
@@ -268,15 +269,19 @@ function convertCurlIntoResponse(stdout: string): Response {
  * @param {Record<string, string>} [options.cookies] les cookies à envoyer sous forme d'objet associant au nom du cookie sa valeur
  * @param {Record<string, string>} [options.headers] les en-têtes à envoyer sous forme d'objet associant au nom de l'en-tête sa valeur
  * @param {number} [options.retries] nombre maximal de tentatives d'envoi de la requête au cas où une erreur `429 Too Many Requests` se produit (par défaut `3`)
- * @param {number} [options.retryDelay] délai entre chaque tentative en millisecondes (par défaut `1 000`)
+ * @param {number} [options.retryDelay] délai entre chaque tentative en millisecondes (par défaut `2 000`)
  * @param {number[]} [options.allowedStatusErrors] contient les statuts HTTP signalant un échec à ignorer, c'est-à-dire ceux qui ne causeront pas l'erreur {@link errors.JvcResponseError | JvcResponseError} si renvoyés. Contient par défaut les statuts 400 (`Bad Request`) et 404 (`Not Found`)
  * @param {boolean} [options.curl] `true` pour utiliser [`cURL`](https://curl.se/docs/manpage.html) afin de contourner les restrictions Cloudflare des serveurs JVC (nécessite que `cURL` soit installé sur la machine), `false` pour envoyer la requête avec {@link !fetch | `fetch`} (par défaut)
- * @throws {@link errors.JvcResponseError | JvcResponseError} si un statut HTTP signalant un échec a été rencontré et qu'il n'est pas listé dans `allowedStatusErrors`
+ * @throws {@link errors.JvcResponseError | `JvcResponseError`} si un statut HTTP signalant un échec a été rencontré et qu'il n'est pas listé dans `allowedStatusErrors`
  * 
  * @returns {Promise<Response>}
  */
-export async function request(url: string | URL, { method = "GET", query = {}, headers = {}, data = undefined, cookies = {}, allowedStatusErrors = [HTTP_CODES.BAD_REQUEST, HTTP_CODES.NOT_FOUND], bodyMode = "json", curl = false, retries = DEFAULT_REQUEST_RETRIES, retryDelay = SECOND_DELAY }: { method?: LibTypes.Requests.HttpMethod; query?: Record<string, any>; data?: LibTypes.Requests.BodyType; cookies?: Record<string, string>; headers?: Record<string, string>; allowedStatusErrors?: number[]; bodyMode?: LibTypes.Requests.BodyMode; curl?: boolean; retries?: number; retryDelay?: number } = {}): Promise<Response> {
+export async function request(url: string | URL, { method = "GET", query = {}, headers = {}, data = undefined, cookies = {}, allowedStatusErrors = [HTTP_CODES.BAD_REQUEST, HTTP_CODES.NOT_FOUND], bodyMode = "json", curl = false, retries = DEFAULT_REQUEST_RETRIES, retryDelay = 2*SECOND_DELAY }: LibTypes.Args.Requests.RequestOptions = {}): Promise<Response> {
     headers = normalizeHeaders(headers);
+
+    if (SESSION) {
+        cookies = { ...cookies, ...SESSION };
+    }
 
     const reqHeaders = new Headers({
         ...headers,
@@ -320,7 +325,11 @@ export async function request(url: string | URL, { method = "GET", query = {}, h
 
 
     if (!response.ok && !allowedStatusErrors.includes(response.status)) {
-        throw new JvcResponseError(`Unexpected status code signalling a request failure: ${response.status}.`);
+        if (response.status === HTTP_CODES.FORBIDDEN) {
+            throw new JvcResponseError(`Unexpected status code signalling a request failure: ${response.status}.\nL'erreur renvoyée est une erreur 403 Forbidden, ce qui signifie généralement que les services Cloudflare ont bloqué votre requête à JVC. Pour empêcher cela d'advenir, faites appel à la fonction setupCloudflare dont l'usage est expliqué dans la section « Démarrage rapide » de la documentation.`);
+        } else {
+            throw new JvcResponseError(`Unexpected status code signalling a request failure: ${response.status}.`);
+        }
     }
 
     return response;
