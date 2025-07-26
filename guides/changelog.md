@@ -61,3 +61,4 @@ title: Notes de version
     * Correction et amélioration de la méthode {@link scrapers.JVCode.htmlToJVCode | `htmlToJVCode`}
     * Retrait des méthodes `Account.getFavorites` et `Profile.getFavorites`, respectivement divisées en {@link classes.Account.getFavoriteForums | `Account.getFavoriteForums`}, {@link classes.Account.getFavoriteTopics | `Account.getFavoriteTopics`}, {@link classes.Account.getFavoriteGames | `Account.getFavoriteGames`} et {@link classes.Profile.getFavoriteForums | `Profile.getFavoriteForums`}, {@link classes.Profile.getFavoriteTopics | `Profile.getFavoriteTopics`}, {@link classes.Profile.getFavoriteGames | `Profile.getFavoriteGames`}
     * Modifications mineures de la documentation
+- **v0.4.1** : correction d'une erreur qui empêchait la fonction {@link requests.setupCloudflare | `setupCloudflare`} d'être importée
