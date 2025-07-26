@@ -13,7 +13,7 @@
 <div class="tsd-alert tsd-alert-note"><div class="tsd-alert-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="../assets/icons.svg#icon-alertNote"></use></svg><span>Note</span></div><p>
 Un avis posté sous un jeu vidéo ne concerne qu'<strong>une seule machine</strong>, renseignée par l'utilisateur.</p>
 </div>
-<a id="méthodes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Méthodes<a href="#méthodes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3><p><em>Les méthodes suivies d'une astérisque sont des <a href="Scraping.html#page-scrapers">page scrapers</a>.</em></p>
+<a id="méthodes" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Méthodes<a href="#méthodes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3><p><em>Les méthodes suivies d'une astérisque sont des <a href="Scraping.html#fonctionnement-des-page-scrapers">page scrapers</a>.</em></p>
 <a id="classe-statique-v4" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Classe statique <code>V4</code><a href="#classe-statique-v4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><ul>
 <li><a href="../classes/API.scrapers.V4.html#getgames" class="tsd-kind-method"><code>V4.getGames</code></a>* renvoie les jeux vidéo répertoriés par JVC</li>
 <li><a href="../classes/API.scrapers.V4.html#getgamesreleases" class="tsd-kind-method"><code>V4.getGamesReleases</code></a>* renvoie les jeux attendus</li>
@@ -21,6 +21,7 @@ Un avis posté sous un jeu vidéo ne concerne qu'<strong>une seule machine</stro
 </ul>
 <a id="classe-game" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Classe <code>Game</code><a href="#classe-game" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Représente un jeu vidéo. Le constructeur prend en argument l'ID du jeu.</p>
 <ul>
+<li><a href="../classes/API.classes.Game.html#doesgameexist" class="tsd-kind-method"><code>Game.doesGameExist</code></a> renvoie <code>true</code> si le jeu existe, <code>false</code> sinon</li>
 <li><a href="../classes/API.classes.Game.html#getinfos" class="tsd-kind-method"><code>Game.getInfos</code></a> renvoie les informations du jeu</li>
 <li><a href="../classes/API.classes.Game.html#getdetails" class="tsd-kind-method"><code>Game.getDetails</code></a> renvoie des informations approfondies sur le jeu</li>
 <li><a href="../classes/API.classes.Game.html#getlightinfos" class="tsd-kind-method"><code>Game.getLightInfos</code></a> renvoie des informations génériques sur le jeu</li>
@@ -33,6 +34,7 @@ Un avis posté sous un jeu vidéo ne concerne qu'<strong>une seule machine</stro
 </ul>
 <a id="classe-review" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Classe <code>Review</code><a href="#classe-review" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Représente un avis d'un utilisateur de JVC. Le constructeur prend en arguments l'ID de l'avis, le jeu (ID ou instance de <code>Game</code>) et l'ID de la machine concernée par l'avis.</p>
 <ul>
+<li><a href="../classes/API.classes.Review.html#doesreviewexist" class="tsd-kind-method"><code>Review.doesReviewExist</code></a> renvoie <code>true</code> si l'avis existe, <code>false</code> sinon</li>
 <li><a href="../classes/API.classes.Review.html#getinfos" class="tsd-kind-method"><code>Review.getInfos</code></a> renvoie les informations de l'avis</li>
 </ul>
 <a id="exemples" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Exemples<a href="#exemples" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Pour afficher les pages de jeux de genre <em>Aventure</em> et de mode <em>Multi en local</em> jouables sur PC :</p>
