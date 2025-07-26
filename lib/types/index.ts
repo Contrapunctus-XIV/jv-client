@@ -3,6 +3,7 @@ import Content, { Video } from "../classes/Content.js";
 import Game from "../classes/Game.js";
 import Review from "../classes/Review.js";
 import Topic from "../classes/Topic.js";
+import Post from "../classes/Post.js";
 
 declare namespace V4Types {
     /**
@@ -296,8 +297,16 @@ declare namespace V4Types {
         }
 
         type Images = {
-            imageUrl: string;
-        }[];
+            paging: V4Types.Paging;
+            items: { imageUrl: string };
+        };
+
+        /**
+         * @inline
+         */
+        interface MachineId {
+            machineId?: number;
+        }
     }
 
     namespace Games {
@@ -323,12 +332,12 @@ declare namespace V4Types {
         }
 
         interface Summary {
-            reviews: V4Types.Content.Generic[];
-            previews: V4Types.Content.Generic[];
-            releases: V4Types.Game.Generic[];
-            trending: V4Types.Game.Generic[];
-            awaited: V4Types.Game.Generic[];
-            tipsnews: V4Types.Content.Generic[];
+            reviews: Content[];
+            previews: Content[];
+            releases: Game[];
+            trending: Game[];
+            awaited: Game[];
+            tipsnews: Content[];
         }
 
         interface Raw {
@@ -445,34 +454,40 @@ declare namespace V4Types {
                 games: Game[];
             }
 
-            type Games = V4Types.Game.Generic & {
+            type FavoriteGame = V4Types.Game.Generic & {
                 machine: number;
-            }[];
+            };
 
-            type Forums = {
+            type FavoriteForum = {
                 id: number;
                 title: string;
-            }[];
+            };
 
-            type Topics = {
+            type FavoriteTopic = {
                 id: number;
                 forumId: number;
                 title: string;
-            }[];
+            };
+
+            interface FavoriteGames {
+                paging: V4Types.Paging;
+                items: V4Types.Account.Favorites.FavoriteGame[];
+            }
+
+            interface FavoriteForums {
+                paging: V4Types.Paging;
+                items: V4Types.Account.Favorites.FavoriteForum[];
+            }
+
+            interface FavoriteTopics {
+                paging: V4Types.Paging;
+                items: V4Types.Account.Favorites.FavoriteTopic[];
+            }
 
             interface Raw {
-                games: {
-                    paging: V4Types.Paging;
-                    items: V4Types.Account.Favorites.Games;
-                };
-                forums: {
-                    paging: V4Types.Paging;
-                    items: V4Types.Account.Favorites.Forums;
-                };
-                topics: {
-                    paging: V4Types.Paging;
-                    items: V4Types.Account.Favorites.Topics;
-                }
+                games: FavoriteGames;
+                forums: FavoriteForums
+                topics: FavoriteTopics;
             }
         }
 
@@ -550,81 +565,6 @@ declare namespace V4Types {
         }
     }
 
-    namespace Request {
-        /**
-         * @hidden
-         */
-        interface RequestOptions {
-            query?: Record<string, any>;
-            raw?: boolean;
-            type?: "content" | "game" | "video" | "hightech" | "review" | "comment" | "topComment";
-        }
-        
-        interface GamesQuery {
-            machine?: number;
-            genre?: number;
-            mode?: number;
-        }
-        
-        interface ContentsQuery {
-            categories?: number[];
-            types?: number[];
-            events?: number[];
-        }
-        
-        interface ReleasesQuery {
-            month?: number;
-            year?: number;
-        }
-        
-        /**
-         * Interface contenant des informations permettant de définir les pages à traiter lors d'une requête.
-         * 
-         * Note : la numérotation commence à `1`.
-         * 
-         * @property {number} begin Première page à traiter, par défaut `1`
-         * @property {number | null} end Dernière page à traiter, par défaut `null` pour traiter toutes les pages restantes
-         * @property {number} step Pas entre deux pages, par défaut `1`
-         * @interface
-         */
-        interface Paging {
-            begin?: number;
-            end?: number | null;
-            step?: number;
-        }
-        
-        /**
-         * @hidden
-         */
-        type Options =
-            | { paging?: never; page: number; raw?: boolean; perPage?: number; }
-            | { page?: never; paging?: Paging; raw?: boolean; perPage?: number; };
-        
-        /**
-         * @hidden
-         */
-        type GamesOptions = Options & { query?: GamesQuery };
-        /**
-         * @hidden
-         */
-        type ContentsOptions = Options & { query?: ContentsQuery };
-        /**
-         * @hidden
-         */
-        type ReleasesOptions = Options & { query?: ReleasesQuery };
-
-        /**
-         * @hidden
-         */
-        namespace Game {
-            type Options = V4Types.Request.Options & { machineId?: number };
-
-            interface RequestOptions extends V4Types.Request.RequestOptions {
-                machineId?: number | null;
-            }
-        }
-    }
-
     interface Product {
         id: number;
         label: string;
@@ -698,7 +638,9 @@ declare namespace JVCTypes {
             publicationDate: Date,
             url: string,
             forumId: number;
+            resolved: boolean;
             poll?: Poll;
+            lockReason?: string;
         }
 
         interface Post {
@@ -788,60 +730,6 @@ declare namespace JVCTypes {
             [K in keyof Infos]: [string, (el: cheerio.Cheerio) => Infos[K]];
         }
     }
-
-    namespace Request {
-        /** 
-         * Interface contenant des informations permettant de définir les pages à traiter lors d'une requête.
-         * 
-         * Note : la numérotation commence à `1`.
-         * 
-         * @property {number} begin Première page à traiter, par défaut `1`
-         * @property {number | null} end Dernière page à traiter, par défaut `null` pour traiter toutes les pages restantes
-         * @property {number} step Pas entre deux pages, par défaut `1`
-         *
-         * @interface
-         */
-        interface Paging {
-            begin?: number;
-            end?: number | null;
-            step?: number;
-        }
-
-        /**
-         * @hidden
-         */
-        interface OptionsPage {
-            paging?: never;
-            page: number;
-            raw?: boolean;
-        }
-
-        /**
-         * @hidden
-         */
-        interface OptionsPaging {
-            paging?: Paging;
-            page?: never;
-            raw?: boolean;
-        }
-
-        /**
-         * @hidden
-         */
-        type Options = OptionsPage | OptionsPaging;
-        /**
-         * @hidden
-         */
-        type SearchTopicOptions = Options & { searchMode?: "author" | "title" };
-        /**
-         * @hidden
-         */
-        interface RequestOptions {
-            query?: Record<string, any>;
-            raw?: boolean;
-        }
-    }
-
     /**
      * @hidden
      */
@@ -902,19 +790,6 @@ declare namespace JVCTypes {
 
 declare namespace LibTypes {
     namespace Requests {
-        
-        /**
-         * @interface
-         */
-        interface Options {
-            method?: HttpMethod;
-            query?: Record<string, any>;
-            data?: any;
-            cookies?: Record<string, string>;
-            headers?: Record<string, string>;
-            allowedStatusErrors?: number[];
-        }
-
         /**
          * les attributs qui sont obtenus après parsing de la sortie de cURL
          * @hidden
@@ -943,6 +818,212 @@ declare namespace LibTypes {
         type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS";
         type BodyMode = "json" | "url" | "form" | "any";
         type BodyType = string | Record<string, any> | URLSearchParams | FormData | any;
+    }
+
+    namespace Args {
+        interface Pagination {
+            begin?: number;
+            end?: number | null;
+            step?: number;
+        }
+
+        /**
+         * @inline
+         */
+        type Raw<T = {}> = T & { raw: true };
+        /**
+         * @inline
+         */
+        type NotRaw<T = {}> = T & { raw?: boolean };
+        /**
+         * @inline
+         */
+        type Page<T = {}> = T & { page: number; raw?: boolean };
+        /**
+         * @inline
+         */
+        type Paging<T = {}> = T & { paging?: Pagination; raw?: boolean };
+        type RawAndPage<T = {}> = Raw<T> & Page<T>;
+        type RawAndPaging<T = {}> = Raw<T> & Paging<T>;
+        type PageOrPaging<T = {}> = (Page<T> & { paging?: never }) | (Paging<T> & { page?: never });
+
+        interface Base {
+            perPage?: number;
+        }
+
+        namespace Content {
+            interface Base {
+                perPage?: number;
+            }
+            
+            type RequestType = "video" | "comment" | "topComment" | "content";
+            
+            interface RequestOptions<T = RequestType> {
+                query?: Query,
+                type?: T
+            }
+
+            interface OptionsWithPaging {
+                raw?: boolean;
+                paging?: Pagination;
+                perPage?: number;
+            }
+
+            interface OptionsWithPage {
+                raw?: boolean;
+                page: number;
+                perPage?: number
+            }
+
+        }
+
+        type Query = Record<string, any>;
+
+        namespace ForumTopic {
+
+            /**
+             * @inline
+             */
+            interface UseApi {
+                api?: boolean;
+            }
+
+            interface SearchTopic {
+                searchMode?: "author" | "title"
+            }
+        }
+
+        namespace ForumClient {
+            interface Poll {
+                title: string;
+                answers: string[];
+            }
+
+            /**
+             * @inline
+             */
+            interface PostTopicOptions {
+                poll?: Poll;
+            }
+
+            /**
+             * @inline
+             */
+            interface UpOptions {
+                delay?: number;
+                callback?: (post: Post) => any;
+            }
+        }
+
+        namespace Game {
+            /**
+             * @inline
+             */
+            interface MachineId {
+                machineId?: number;
+            }
+
+            type Base = {
+                perPage?: number;
+            } & MachineId;
+
+            type RequestType = "content" | "video" | "review";
+
+            type RequestOptions<T = RequestType> = {
+                type?: T;
+                query?: Query;
+            } & MachineId;
+        }
+
+        namespace Profile {
+            /**
+             * @inline
+             */
+            interface FavoriteOptions {
+                mode?: "add" | "update" | "remove"
+            }
+        }
+
+        namespace V4Client {
+
+            /**
+             * @inline
+             */
+            interface OnProfile {
+                onProfile?: boolean;
+            }
+        }
+
+        namespace JVCode {
+            /**
+             * @inline
+             */
+            interface ReplaceQTags {
+                replaceQTags?: boolean;
+            }
+        }
+
+        namespace V4 {
+            type RequestType = "content" | "video" | "game" | "hightech";
+
+            type RequestOptions<T = RequestType> = {
+                type?: T;
+                query?: Query;
+            };
+
+            interface GamesQuery {
+                machine?: number;
+                genre?: number;
+                mode?: number;
+            }
+            
+            interface ContentsQuery {
+                categories?: number[];
+                types?: number[];
+                events?: number[];
+            }
+            
+            interface ReleasesQuery {
+                month?: number;
+                year?: number;
+            }
+
+            type ContentsOptions = Base & {
+                query?: ContentsQuery;
+            };
+
+            type GamesOptions = Base & {
+                query?: GamesQuery;
+            };
+
+            type ReleasesOptions = Base & {
+                query?: ReleasesQuery;
+            };
+        }
+
+        namespace Requests {
+            /**
+             * @inline
+             */
+            interface RequestApiOptions {
+                method?: LibTypes.Requests.HttpMethod;
+                query?: Record<string, any>;
+                data?: LibTypes.Requests.BodyType;
+                cookies?: Record<string, string>;
+                headers?: Record<string, string>;
+                allowedStatusErrors?: number[];
+                bodyMode?: LibTypes.Requests.BodyMode;
+                retries?: number;
+                retryDelay?: number 
+            }
+
+            /**
+             * @inline
+             */
+            interface RequestOptions extends RequestApiOptions {
+                curl?: boolean;
+            }
+        }
     }
 }
 
