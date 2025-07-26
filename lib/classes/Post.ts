@@ -3,7 +3,7 @@
  */
 
 import { load } from "cheerio";
-import { InexistentContent } from "../errors.js";
+import { NonexistentContent } from "../errors.js";
 import { request } from "../requests.js";
 import { DOMAIN, HTTP_CODES, POST_SELECTORS } from "../vars.js";
 import { checkInteger, convertJVCStringToDate } from "../utils.js";
@@ -51,12 +51,15 @@ export default class Post {
     }
 
     /**
-     * Renvoie `true` si le post existe, `false` sinon.
+     * Renvoie `true` si le post existe, `false` sinon. Nécessite une instance connectée de {@link Client}.
      *
+     * @param {Client} client client connecté
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
      * @returns  {Promise<boolean>}
      */
-    async doesPostExist(): Promise<boolean> {
-        const response = await request(this._url, { curl: true });
+    async doesPostExist(client: Client): Promise<boolean> {
+        client.assertConnected();
+        const response = await request(this._url, { cookies: client.session, curl: true });
 
         return response.ok;
     }
@@ -66,9 +69,9 @@ export default class Post {
      *
      * @param {Response} response
      */
-    _rejectIfInexistent(response: Response): void {
+    _rejectIfNonexistent(response: Response): void {
         if (response.status === HTTP_CODES.NOT_FOUND) {
-            throw new InexistentContent(`Post of ID ${this.id} does not exist.`);
+            throw new NonexistentContent(`Post of ID ${this.id} does not exist.`);
         }
     }
 
@@ -76,8 +79,8 @@ export default class Post {
      * Renvoie les informations du post. Nécessite une instance connectée de {@link Client}.
      *
      * @param {Client} client client connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le post n'existe pas
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le post n'existe pas
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
      * @returns  {Promise<JVCTypes.Post.Infos>}
      */
     async getInfos(client: Client): Promise<JVCTypes.Post.Infos> {
@@ -85,7 +88,7 @@ export default class Post {
         
         const response = await request(this._url, { cookies: client.session, curl: true });
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         const $ = load(await response.text());
         const author = $(POST_SELECTORS["author"]).text().trim();

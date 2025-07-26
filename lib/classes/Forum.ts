@@ -7,8 +7,8 @@ import { request } from "../requests.js";
 import { load } from "cheerio";
 import { checkInteger, convertJVCStringToDate, sleep } from "../utils.js";
 import Topic from "./Topic.js";
-import { InexistentContent } from "../errors.js";
-import { JVCTypes } from "../types/index.js";
+import { NonexistentContent } from "../errors.js";
+import { JVCTypes, LibTypes } from "../types/index.js";
 
 /**
  * Classe représentant un forum. Utilise le site JVC.
@@ -35,9 +35,9 @@ export default class Forum {
      * @private
      * @hidden
      */
-    private generator(url: string, paging: JVCTypes.Request.Paging, options: JVCTypes.Request.RequestOptions & { raw: true }): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
-    private generator(url: string, paging: JVCTypes.Request.Paging, options?: JVCTypes.Request.RequestOptions): AsyncGenerator<Topic[], void, unknown>;
-    private generator(url: string, paging: JVCTypes.Request.Paging, { raw = false, query = {} }: JVCTypes.Request.RequestOptions = {}) {
+    private generator(url: string, paging: LibTypes.Args.Pagination, options: LibTypes.Args.Raw<LibTypes.Args.Query>): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
+    private generator(url: string, paging: LibTypes.Args.Pagination, options?: LibTypes.Args.NotRaw<LibTypes.Args.Query>): AsyncGenerator<Topic[], void, unknown>;
+    private generator(url: string, paging: LibTypes.Args.Pagination, { raw = false, query = {} }: LibTypes.Args.NotRaw<LibTypes.Args.Query> = {}) {
         const self = this;
         const { begin = 1, end = null, step = 1 } = paging;
         
@@ -48,10 +48,10 @@ export default class Forum {
                 const forumUrl = self.setUrlPage(currentPage, url);
                 const response = await request(forumUrl, { query, allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
                 
-                self._rejectIfInexistent(response);
+                self._rejectIfNonexistent(response);
 
                 const $ = load(await response.text());
-                const parsedTopics = Forum.parseTopics($, raw);
+                const parsedTopics = Forum.parseTopics($, { raw });
                 yield parsedTopics as JVCTypes.Forum.Topic[] | Topic[];
 
                 if ($(TOPIC_FEED_SELECTORS["nav"]).attr("href") === "") { // si plus de topics après cette page
@@ -67,37 +67,31 @@ export default class Forum {
      * @private
      * @hidden
      */
-    private requestForum(url: string, options: JVCTypes.Request.RequestOptions & { raw: true }): Promise<JVCTypes.Forum.Topic[]>;
-    private requestForum(url: string, options?: JVCTypes.Request.RequestOptions): Promise<Topic[]>;
-    private requestForum(url: string, { raw = false, query = {} }: JVCTypes.Request.RequestOptions) {
-        return request(url, { query, curl: true })
-            .then(response => {
-                // JVC renvoie une erreur 404 si la page n'existe pas, mais redirection si le forum n'existe pas
-                // on renvoie un tableau vide dans le premier cas, mais erreur dans le second
-                // d'où l'appel à rejectInexistent que s'il y a redirection
-                if (response.url === FORUMS_PAGE) {
-                    this._rejectIfInexistent(response);
-                }
-                return response.text();
-            })
-            .then(data => {
-                const $ = load(data);
-                const parsedTopics = Forum.parseTopics($, raw);
-
-                return parsedTopics as JVCTypes.Forum.Topic[] | Topic[];
-            });
+    private requestForum(url: string, options: LibTypes.Args.Raw<LibTypes.Args.Query>): Promise<JVCTypes.Forum.Topic[]>;
+    private requestForum(url: string, options?: LibTypes.Args.NotRaw<LibTypes.Args.Query>): Promise<Topic[]>;
+    private async requestForum(url: string, { raw = false, query = {} }: LibTypes.Args.NotRaw<LibTypes.Args.Query>) {
+        const response = await request(url, { query, curl: true });
+        // JVC renvoie une erreur 404 si la page n'existe pas, mais redirection si le forum n'existe pas
+        // on renvoie un tableau vide dans le premier cas, mais erreur dans le second
+        // d'où l'appel à _rejectIfNonexistent que s'il y a redirection
+        if (response.url === FORUMS_PAGE) {
+            this._rejectIfNonexistent(response);
+        }
+        const data = await response.text();
+        const $ = load(data);
+        const parsedTopics = Forum.parseTopics($, { raw });
+        return parsedTopics as JVCTypes.Forum.Topic[] | Topic[];
     }
 
     /**
      * 
-     * @private
      * @param {Response} response
      * @returns {void}
      * @hidden
      */
-    private _rejectIfInexistent(response: Response) {
+    _rejectIfNonexistent(response: Response) {
         if (response.status === HTTP_CODES.NOT_FOUND || response.url === FORUMS_PAGE) {
-            throw new InexistentContent(`Forum of ID ${this._id} does not exist.`);
+            throw new NonexistentContent(`Forum of ID ${this._id} does not exist.`);
         }
     }
 
@@ -127,12 +121,12 @@ export default class Forum {
     /**
      * Renvoie le titre du forum sous forme de chaîne de caractères.
      * 
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns {Promise<string>}
      */
     async getForumTitle(): Promise<string> {
         const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         const $ = load(await response.text());
         return $(TOPIC_FEED_SELECTORS["forumTitle"]).text().trim();
@@ -145,8 +139,7 @@ export default class Forum {
      */
     async doesForumExist(): Promise<boolean> {
         const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
-
-        return response.ok;
+        return response.ok && response.url !== FORUMS_PAGE;
     }
 
     /**
@@ -170,13 +163,14 @@ export default class Forum {
     /**
      * Renvoie l'URL exacte du forum, obtenue après une requête à JVC.
      * 
-     * @param {boolean} [api] `true` pour renvoyer l'URL de l'API `v4`, `false` pour celle du site JVC (par défaut)
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @param {LibTypes.Args.ForumTopic.UseApi} [options]
+     * @param {boolean} [options.api] `true` pour renvoyer l'URL de l'API `v4`, `false` pour celle du site JVC (par défaut)
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns {Promise<string>}
      */
-    async getRealURL(api: boolean = false): Promise<string> {
+    async getStandardURL({ api = false }: LibTypes.Args.ForumTopic.UseApi = {}): Promise<string> {
         const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
         return api ? response.url : response.url.replace(API_DOMAIN, DOMAIN);
     }
 
@@ -185,9 +179,9 @@ export default class Forum {
      * @private
      * @hidden
      */
-    private static parseTopics($: cheerio.Root, raw: true): JVCTypes.Forum.Topic[];
-    private static parseTopics($: cheerio.Root, raw?: boolean): Topic[];
-    private static parseTopics($: cheerio.Root, raw: boolean = false): Topic[] | JVCTypes.Forum.Topic[] {
+    private static parseTopics($: cheerio.Root, options: LibTypes.Args.Raw): JVCTypes.Forum.Topic[];
+    private static parseTopics($: cheerio.Root, options?: LibTypes.Args.NotRaw): Topic[];
+    private static parseTopics($: cheerio.Root, { raw = false }: LibTypes.Args.NotRaw = {}): Topic[] | JVCTypes.Forum.Topic[] {
         const topics = $(SELECTORS["topicItem"]);
         
         const parsedTopics = topics.get().map((x, i): Topic | JVCTypes.Forum.Topic => {
@@ -222,19 +216,19 @@ export default class Forum {
     /**
      * @hidden
      */
-    readTopics(options: JVCTypes.Request.OptionsPage & { raw: true }): Promise<JVCTypes.Forum.Topic[]>;
+    readTopics(options: LibTypes.Args.RawAndPage): Promise<JVCTypes.Forum.Topic[]>;
     /**
      * @hidden
      */
-    readTopics(options: JVCTypes.Request.OptionsPage): Promise<Topic[]>;
+    readTopics(options: LibTypes.Args.Page): Promise<Topic[]>;
     /**
      * @hidden
      */
-    readTopics(options: JVCTypes.Request.OptionsPaging & { raw: true }): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
+    readTopics(options: LibTypes.Args.RawAndPaging): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
     /**
      * @hidden
      */
-    readTopics(options?: JVCTypes.Request.OptionsPaging): AsyncGenerator<Topic[], void, unknown>;
+    readTopics(options?: LibTypes.Args.Paging): AsyncGenerator<Topic[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des topics postés sur le forum situés aux pages décrites par le paramètre `paging`.
      * 
@@ -246,13 +240,13 @@ export default class Forum {
      * }
      * ```
      *
-     * @param {{ raw?: boolean, paging?: JVCTypes.Request.Paging }} [options]
+     * @param {LibTypes.Args.Paging} [options]
      * @param {JVCTypes.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic}), `false` pour utiliser les classes fournies par la librairie ({@link Topic})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic | `JVCTypes.Forum.Topic`}), `false` pour utiliser les classes fournies par la librairie ({@link Topic | `Topic`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns  {(AsyncGenerator<Topic[] |  JVCTypes.Forum.Topic[], void, unknown>)}
      */
-    readTopics(options?: { raw?: boolean, paging?: JVCTypes.Request.Paging }): AsyncGenerator<Topic[] | JVCTypes.Forum.Topic[], void, unknown>;
+    readTopics(options?: LibTypes.Args.Paging): AsyncGenerator<Topic[] | JVCTypes.Forum.Topic[], void, unknown>;
     /**
      * Renvoie les topics postés sur le forum situés à une page particulière.
      *
@@ -261,14 +255,14 @@ export default class Forum {
      * const forum = new Forum(51);
      * console.log(await forum.readTopics({ page: 2 }));
      * ```
-     * @param {{ raw?: boolean, page: number }} options
+     * @param {LibTypes.Args.Page} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Topic})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic | `JVCTypes.Forum.Topic`}), par défaut `false` pour utiliser les classes fournies par la librairie ({@link Topic | `Topic`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns  {(AsyncGenerator<Topic[] |  JVCTypes.Forum.Topic[], void, unknown>)}
      */
-    readTopics(options: { page: number, raw?: boolean }): Promise<Topic[] |  JVCTypes.Forum.Topic[]>;
-    readTopics({ paging = {}, page, raw = false }: JVCTypes.Request.Options = {}): AsyncGenerator<any, void, unknown> | Promise<any> {
+    readTopics(options: LibTypes.Args.Page): Promise<Topic[] |  JVCTypes.Forum.Topic[]>;
+    readTopics({ paging = {}, page, raw = false }: LibTypes.Args.PageOrPaging = {}): AsyncGenerator<any, void, unknown> | Promise<any> {
         if (page !== undefined) {
             const url = this.setUrlPage(page, this._api_url);
             return this.requestForum(url, { raw });
@@ -280,47 +274,47 @@ export default class Forum {
     /**
      * @hidden
      */
-    searchTopics(q: string, options: JVCTypes.Request.SearchTopicOptions & { page: number, raw: true }): Promise<JVCTypes.Forum.Topic[]>;
+    searchTopics(q: string, options: LibTypes.Args.RawAndPage<LibTypes.Args.ForumTopic.SearchTopic>): Promise<JVCTypes.Forum.Topic[]>;
     /**
      * @hidden
      */
-    searchTopics(q: string, options: JVCTypes.Request.SearchTopicOptions & { page: number }): Promise<Topic[]>;
+    searchTopics(q: string, options: LibTypes.Args.Page<LibTypes.Args.ForumTopic.SearchTopic>): Promise<Topic[]>;
     /**
      * @hidden
      */
-    searchTopics(q: string, options: JVCTypes.Request.SearchTopicOptions & { raw: true }): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
+    searchTopics(q: string, options: LibTypes.Args.RawAndPaging<LibTypes.Args.ForumTopic.SearchTopic>): AsyncGenerator<JVCTypes.Forum.Topic[], void, unknown>;
     /**
      * @hidden
      */
-    searchTopics(q: string, options?: JVCTypes.Request.SearchTopicOptions): AsyncGenerator<Topic[], void, unknown>;
+    searchTopics(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.ForumTopic.SearchTopic>): AsyncGenerator<Topic[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des résultats de la recherche de topics postés sur le forum situés aux pages décrites par le paramètre `paging`.
      *
      * @param {string} q termes de recherche
-     * @param {({ paging?: JVCTypes.Request.Paging, raw?: boolean, searchMode?: "title" | "author" })} [options]
+     * @param {LibTypes.Args.Paging<LibTypes.Args.ForumTopic.SearchTopic>} [options]
      * @param {JVCTypes.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic}), `false` pour utiliser les classes fournies par la librairie ({@link Topic})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic | `JVCTypes.Forum.Topic`}), `false` pour utiliser les classes fournies par la librairie ({@link Topic | `Topic`})
      * @param {"title" | "author"} [options.searchMode] type de recherche, par titre (défaut) ou par auteur
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns  {(AsyncGenerator<Topic[] | JVCTypes.Forum.Topic[], void, unknown>)}
      */
-    searchTopics(q: string, options?: { paging?: JVCTypes.Request.Paging, raw?: boolean, searchMode?: "title" | "author" }): AsyncGenerator<Topic[] | JVCTypes.Forum.Topic[], void, unknown>;
+    searchTopics(q: string, options?: LibTypes.Args.Paging<LibTypes.Args.ForumTopic.SearchTopic>): AsyncGenerator<Topic[] | JVCTypes.Forum.Topic[], void, unknown>;
     /**
      * Renvoie les résultats de la recherche de topics postés sur le forum situés à une page particulière.
      *
      * @param {string} q termes de recherche
-     * @param {({ page: number, raw?: boolean, searchMode?: "title" | "author" })} options
+     * @param {LibTypes.Args.Page<LibTypes.Args.ForumTopic.SearchTopic>} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic}), `false` pour utiliser les classes fournies par la librairie ({@link Topic})
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Forum.Topic | `JVCTypes.Forum.Topic`}), `false` pour utiliser les classes fournies par la librairie ({@link Topic | `Topic`})
      * @param {"title" | "author"} [options.searchMode] type de recherche, par titre (défaut) ou par auteur
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns  {(Promise<Topic[] | JVCTypes.Forum.Topic[]>)}
      */
-    searchTopics(q: string, options: { page: number, raw?: boolean, searchMode?: "title" | "author" }): Promise<Topic[] | JVCTypes.Forum.Topic[]>;
-    searchTopics(q: string, { paging = {}, page, raw = false, searchMode = "title" }: JVCTypes.Request.SearchTopicOptions = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    searchTopics(q: string, options: LibTypes.Args.Page<LibTypes.Args.ForumTopic.SearchTopic>): Promise<Topic[] | JVCTypes.Forum.Topic[]>;
+    searchTopics(q: string, { paging = {}, page, raw = false, searchMode = "title" }: LibTypes.Args.PageOrPaging<LibTypes.Args.ForumTopic.SearchTopic> = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         const mode = searchMode === "title" ? "titre_topic" : "auteur_topic";
         const query = { "search_in_forum": q, "type_search_in_forum": mode };
-        const urlPromise = this.getRealURL(true).then(url => url.replace("/forums", "/recherche/forums"));
+        const urlPromise = this.getStandardURL({ api: true }).then(url => url.replace("/forums", "/recherche/forums"));
     
         if (page !== undefined) {
             return urlPromise.then(url => {
@@ -339,13 +333,13 @@ export default class Forum {
     /**
      * Renvoie le nombre de connectés au forum.
      *
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns {Promise<number>}
      */
     async getConnected(): Promise<number> {
         const response = await request(this._url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         const $ = load(await response.text());
         const connected = parseInt($(TOPIC_FEED_SELECTORS["connected"]).text().trim().split(" ")[0]);
@@ -356,11 +350,11 @@ export default class Forum {
     /**
      * @hidden
      */
-    listen(options: { raw: true }): AsyncGenerator<JVCTypes.Forum.Topic, void, unknown>;
+    listen(options: LibTypes.Args.Raw): AsyncGenerator<JVCTypes.Forum.Topic, void, unknown>;
     /**
      * @hidden
      */
-    listen(options?: { raw?: boolean }): AsyncGenerator<Topic, void, unknown>;
+    listen(options?: LibTypes.Args.NotRaw): AsyncGenerator<Topic, void, unknown>;
     /**
      * Renvoie un générateur asynchrone des nouveaux topics détectés.
      *
@@ -371,22 +365,22 @@ export default class Forum {
      *      console.log(newTopic);
      * }
      * ```
-     * @param {{ raw?: boolean }} [options]
-     * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link JVCTypes.Forum.Topic}), `false` pour utiliser les classes fournies par la librairie ({@link Topic})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
+     * @param {LibTypes.Args.NotRaw} [options]
+     * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link JVCTypes.Forum.Topic | `JVCTypes.Forum.Topic`}), `false` pour utiliser les classes fournies par la librairie ({@link Topic | `Topic`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
      * @returns  {(AsyncGenerator<Topic | JVCTypes.Forum.Topic, void, unknown>)}
      */
-    listen(options?: { raw?: boolean }): AsyncGenerator<Topic | JVCTypes.Forum.Topic, void, unknown>;
-    async * listen({ raw = false } = {}) {
+    listen(options?: LibTypes.Args.NotRaw): AsyncGenerator<Topic | JVCTypes.Forum.Topic, void, unknown>;
+    async * listen({ raw = false }: LibTypes.Args.NotRaw = {}) {
         const topicsSeen: number[] = [];
 
         while (true) {
             const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND], curl: true });
 
-            this._rejectIfInexistent(response);
+            this._rejectIfNonexistent(response);
 
             const $ = load(await response.text());
-            const topics = Forum.parseTopics($, true);
+            const topics = Forum.parseTopics($, { raw: true });
             for (const topic of topics) {
                 if (topic.nbAnswers === 0 && topic.icon !== "pinned" && !topicsSeen.includes(topic.id)) {
                     yield raw ? topic : new Topic(topic.id);

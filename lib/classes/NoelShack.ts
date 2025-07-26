@@ -3,7 +3,7 @@
  */
 
 import { request } from "../requests.js";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { DOMAIN_URL, MOSAIC_VALUES, NOELSHACK_UPLOAD_FILE_URL, NOELSHACK_UPLOAD_FROM_URL, SECOND_DELAY } from "../vars.js";
 import { JvcErrorMessage, ValueError } from "../errors.js";
 import { JVCTypes } from "../types/index.js";

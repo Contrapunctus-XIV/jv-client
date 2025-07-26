@@ -10,7 +10,7 @@ import Content from "./Content.js";
 import ContentComment from "./ContentComment.js";
 import Game from "./Game.js";
 import Review from "./Review.js";
-import { V4Types } from "../types/index.js";
+import { LibTypes, V4Types } from "../types/index.js";
 
 /**
  * Classe permettant des interactions avec les contenus du site. Utilise l'API `v4` et nécessite un {@link Client} connecté.
@@ -45,9 +45,9 @@ export default class V4Client {
      *
      * @param {Content} content instance représentant le contenu
      * @param {string} text corps du commentaire
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le contenu n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni ou si le message est invalide
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le contenu n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async addComment(content: Content, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -56,8 +56,8 @@ export default class V4Client {
         const route = `contents/${content.id}/comments`;
 
         const response = await requestApi(route, { method: 'POST', data: { content: text }, cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
-        content._rejectIfInexistent(response);
-        V4Client.detectError(response)
+        content._rejectIfNonexistent(response);
+        await V4Client.detectError(response)
 
         const data = await response.json() as V4Types.Content.Comment.Infos;
 
@@ -69,8 +69,8 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {(1 | -1)} vote `1` : positif, `-1` : négatif
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le commentaire n'existe pas
      * @returns  {Promise<void>}
      */
     async addCommentVote(comment: ContentComment, vote: 1 | -1): Promise<void> {
@@ -79,8 +79,8 @@ export default class V4Client {
         this._client.assertConnected();
         const route = `contents/${comment.contentId}/comments/${comment.id}/vote`;
         const response = await requestApi(route, { method: 'POST', data: { type: vote }, cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
-        comment._rejectIfInexistent(response);
-        V4Client.detectError(response);
+        comment._rejectIfNonexistent(response);
+        await V4Client.detectError(response);
     }
 
     /**
@@ -88,9 +88,9 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {string} text corps de la réponse
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni ou si le message est invalide
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le commentaire n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async addAnswer(comment: ContentComment, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -106,8 +106,8 @@ export default class V4Client {
         const route = `contents/${comment.contentId}/comments/${commentId}/answers`;
         const response = await requestApi(route, { method: 'POST', data: { content: text }, cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
 
-        comment._rejectIfInexistent(response);
-        V4Client.detectError(response);
+        comment._rejectIfNonexistent(response);
+        await V4Client.detectError(response);
 
         const data = await response.json() as V4Types.Content.Comment.Infos;
         return data;
@@ -117,9 +117,9 @@ export default class V4Client {
      * Retire le commentaire.
      *
      * @param {ContentComment} comment instance représentant le commentaire
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le contenu n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le commentaire n'appartient pas au compte
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le contenu n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le commentaire n'appartient pas au compte
      * @returns  {Promise<void>}
      */
     async deleteComment(comment: ContentComment): Promise<void> {
@@ -130,8 +130,8 @@ export default class V4Client {
         const route = `contents/${comment.contentId}/comments/${comment.id}`;
         const response = await requestApi(route, { method: "DELETE", cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
 
-        comment._rejectIfInexistent(response);
-        V4Client.detectError(response);
+        comment._rejectIfNonexistent(response);
+        await V4Client.detectError(response);
     }
 
     /**
@@ -146,8 +146,8 @@ export default class V4Client {
         // renvoie 204 dans tous les cas, pas de JSON
         this._client.assertConnected();
         const route = `contents/${comment.contentId}/comments/${comment.id}/vote`;
-        const response = await requestApi(route, { method: "DELETE", cookies: this._client.session });
-        comment._rejectIfInexistent(response);
+        const response = await requestApi(route, { method: "DELETE", cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
+        comment._rejectIfNonexistent(response);
     }
 
     /**
@@ -155,9 +155,9 @@ export default class V4Client {
      *
      * @param {ContentComment} comment instance représentant le commentaire
      * @param {string} text nouveau texte
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le commentaire n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le commentaire n'appartient pas au compte, si le compte est banni ou si le message est invalide
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le commentaire n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le commentaire n'appartient pas au compte, si le compte est banni ou si le message est invalide
      * @returns  {Promise<V4Types.Content.Comment.Infos>}
      */
     async updateComment(comment: ContentComment, text: string): Promise<V4Types.Content.Comment.Infos> {
@@ -168,7 +168,7 @@ export default class V4Client {
         const route = `contents/${comment.contentId}/comments/${comment.id}`;
         const response = await requestApi(route, { method: "PUT", data: { content: text }, cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
         
-        comment._rejectIfInexistent(response);
+        comment._rejectIfNonexistent(response);
         await V4Client.detectError(response);
         const data = await response.json();
         return data as V4Types.Content.Comment.Infos;
@@ -185,8 +185,8 @@ export default class V4Client {
         this._client.assertConnected();
         const route = `contents/${comment.contentId}/comments/${comment.id}`;
         const response = await requestApi(route, { method: "POST", cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
-        comment._rejectIfInexistent(response);
-        V4Client.detectError(response);
+        comment._rejectIfNonexistent(response);
+        await V4Client.detectError(response);
 
         const data = await response.json();
         return data as V4Types.Content.Comment.Infos;
@@ -199,20 +199,20 @@ export default class V4Client {
      * @param {number} machineId ID de la machine sur laquelle l'avis est posté
      * @param {number} mark note comprise entre `0` et `20`
      * @param {string} text corps de l'avis
-     * @param {{ onProfile?: boolean }} [options]
+     * @param {LibTypes.Args.V4Client.OnProfile} [options]
      * @param {boolean} [options.onProfile] `true` pour faire apparaître l'avis sur la page de profil (par défaut)
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le jeu n'existe pas ou si le jeu n'existe pas sur la machine renseignée
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le compte est banni, si le message ou la note est invalide
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le jeu n'existe pas ou si le jeu n'existe pas sur la machine renseignée
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le compte est banni, si le message ou la note est invalide
      * @returns  {Promise<V4Types.Game.Review.Infos>}
      */
-    async addReview(game: Game, machineId: number, mark: number, text: string, { onProfile = true }: { onProfile?: boolean } = {}): Promise<V4Types.Game.Review.Infos> {
+    async addReview(game: Game, machineId: number, mark: number, text: string, { onProfile = true }: LibTypes.Args.V4Client.OnProfile = {}): Promise<V4Types.Game.Review.Infos> {
         this._client.assertConnected();
         const route = `games/${game.id}/${machineId}/reviews/users`;
         const response = await requestApi(route, { method: 'POST', data: { content: text, mark, onProfile }, cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
         
-        game._rejectIfInexistent(response, machineId);
-        V4Client.detectError(response);
+        game._rejectIfNonexistent(response, machineId);
+        await V4Client.detectError(response);
         const data = await response.json();
 
         return data;
@@ -222,8 +222,8 @@ export default class V4Client {
      * Supprime l'avis.
      *
      * @param {Review} review instance représentant l'avis
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si l'avis n'existe pas
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si l'avis n'existe pas
      * @returns  {Promise<void>}
      */
     async deleteReview(review: Review): Promise<void> {
@@ -233,8 +233,8 @@ export default class V4Client {
         const route = `games/${review.gameId}/${review.machineId}/reviews/users/${review.id}`;
         const response = await requestApi(route, { method: "DELETE", cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
 
-        review._rejectIfInexistent(response);
-        V4Client.detectError(response);
+        review._rejectIfNonexistent(response);
+        await V4Client.detectError(response);
     }
 
     /**
@@ -248,7 +248,7 @@ export default class V4Client {
         const route = `games/${review.gameId}/${review.machineId}/reviews/users/${review.id}`;
         const response = await requestApi(route, { method: "POST", cookies: this._client.session, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.CONFLICT] });
 
-        //review._rejectIfInexistent(response);
+        //review._rejectIfNonexistent(response);
         //V4Client.detectError(response);
     }
 }

@@ -2,7 +2,7 @@
  * @module classes
  */
 
-import { InexistentContent } from "../errors.js";
+import { NonexistentContent } from "../errors.js";
 import { requestApi } from "../requests.js";
 import { checkInteger } from "../utils.js";
 import { HTTP_CODES } from "../vars.js";
@@ -70,9 +70,9 @@ export default class Review {
     /**
      * @hidden
      */
-    _rejectIfInexistent(response: Response): void {
+    _rejectIfNonexistent(response: Response): void {
         if (response.status === HTTP_CODES.NOT_FOUND) {
-            throw new InexistentContent(`Review of ID ${this._id} does not exist.`);
+            throw new NonexistentContent(`Review of ID ${this._id} does not exist.`);
         }
     }
 
@@ -91,14 +91,14 @@ export default class Review {
     /**
      * Renvoie les informations de l'avis.
      *
-     * @throws {@link errors.InexistentContent | InexistentContent} si l'avis n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si l'avis n'existe pas
      * @returns  {Promise<V4Types.Game.Review.Infos>}
      */
     async getInfos(): Promise<V4Types.Game.Review.Infos> {
         const route = `games/${this._gameId}/${this._machineId}/reviews/users/${this._id}`;
         const response = await requestApi(route);
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         const data = await response.json() as V4Types.Game.Review.Infos;
 

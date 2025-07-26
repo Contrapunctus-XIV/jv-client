@@ -6,12 +6,12 @@ import { request } from "../requests.js";
 import { load } from "cheerio";
 import Client from "./Client.js";
 import Forum from "./Forum.js";
-import { DEFAULT_UP_DELAY, FORUMS_APP_REGEX, MINIMAL_UP_DELAY, POST_MODERATION_URL, POST_URL, RESOLVE_TOPIC_URL, SECOND_DELAY, SELECTORS, TOPIC_MODERATION_URL, TOPIC_POST_URL } from "../vars.js";
+import { DEFAULT_UP_DELAY, FORUMS_APP_REGEX, HTTP_CODES, MINIMAL_UP_DELAY, POST_MODERATION_URL, POST_URL, RESOLVE_TOPIC_URL, SECOND_DELAY, SELECTORS, TOPIC_MODERATION_URL, TOPIC_POST_URL } from "../vars.js";
 import { JvcErrorMessage, ValueError } from "../errors.js";
 import Topic from "./Topic.js";
 import Post from "./Post.js";
 import { sleep } from "../utils.js";
-import { JVCTypes } from "../types/index.js";
+import { JVCTypes, LibTypes } from "../types/index.js";
 
 /**
  * Classe permettant à l'aide d'un {@link Client} connecté d'interagir avec les forums de JVC.
@@ -19,7 +19,7 @@ import { JVCTypes } from "../types/index.js";
  */
 export default class ForumClient {
     private _client: Client;
-    private _interval: NodeJS.Timeout | null;
+    private _interval: undefined | NodeJS.Timeout;
 
     /**
      * Crée une instance de `ForumClient`.
@@ -27,7 +27,7 @@ export default class ForumClient {
      */
     constructor(client: Client) {
         this._client = client;
-        this._interval = null;
+        this._interval = undefined;
     }
 
     /**
@@ -38,7 +38,7 @@ export default class ForumClient {
      */
     private static async detectJvcErrors(response: Response): Promise<void> {
         try {
-            const data = await response.json();
+            const data = await response.clone().json();
             if (data.errors) {
                 let errors = [""];
                 for (const [_, err] of Object.entries(data.errors)) {
@@ -61,18 +61,19 @@ export default class ForumClient {
      * @param {Forum} forum
      * @param {string} title titre du topic
      * @param {string} body corps du topic
-     * @param {{ poll?: JVCTypes.ForumClient.Poll }} [options] 
-     * @param {JVCTypes.ForumClient.Poll} [options.poll] sondage optionnel que l'on peut poster avec le topic
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le forum n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le texte n'est pas valide
+     * @param {LibTypes.Args.ForumClient.PostTopicOptions} [options] 
+     * @param {LibTypes.Args.ForumClient.Poll} [options.poll] sondage optionnel que l'on peut poster avec le topic
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le forum n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le texte n'est pas valide
      * @return {Promise<Topic>}
      */
-    postTopic(forum: Forum, title: string, body: string, options?: { poll?: JVCTypes.ForumClient.Poll }): Promise<Topic>;
-    async postTopic(forum: Forum, title: string, body: string, { poll }: { poll?: JVCTypes.ForumClient.Poll } = {}) {
+    postTopic(forum: Forum, title: string, body: string, options?: LibTypes.Args.ForumClient.PostTopicOptions): Promise<Topic>;
+    async postTopic(forum: Forum, title: string, body: string, { poll }: LibTypes.Args.ForumClient.PostTopicOptions = {}) {
         this._client.assertConnected();
 
         const inputsRes = await request(forum.url, { cookies: this._client.session, curl: true });
+        forum._rejectIfNonexistent(inputsRes);
         const preData = (await this.getFormData(inputsRes))!;
         const data = {
             topicTitle: title,
@@ -126,15 +127,16 @@ export default class ForumClient {
      *
      * @param {Topic} topic
      * @param {string} text corps du message
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le texte n'est pas valide
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le texte n'est pas valide
      * @return {Promise<Post>}
      */
     async postMessage(topic: Topic, text: string): Promise<Post> {
         this._client.assertConnected();
 
         const inputsRes = await request(topic.url, { cookies: this._client.session, curl: true });
+        topic._rejectIfNonexistent(inputsRes);
         const preData = (await this.getFormData(inputsRes))!;
         const data = {
             text,
@@ -149,31 +151,40 @@ export default class ForumClient {
         const response = await request(POST_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "form", curl: true });
         await ForumClient.detectJvcErrors(response);
 
-        const postId = parseInt(response.url.split("_").pop()!);
+        const result = await response.json() as { redirectUrl: string };
+        const postId = parseInt(result.redirectUrl.split("_").pop()!);
         return new Post(postId);
     }
 
     /**
-     * Permet de *up* un topic, en postant puis supprimant les *ups* au fur et à mesure.
+     * Permet de *up* un topic en postant à intervalles réguliers.
      * 
      * @param topic
      * @param text corps des messages
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @throws {@link errors.ValueError | `ValueError`} si le délai spécifié est invalide
-     * @param { delay?: number } [options]
+     * @param {LibTypes.Args.ForumClient.UpOptions} [options]
      * @param { number } [options.delay] délai entre chaque *up* en secondes (par défaut `25`, ne peut être en dessous de `15`)
+     * @param {{callback?: (post: Post) => any}} [options.callback] fonction à appeler sur un *up*, par défaut supprime le *up*
      */
-    up(topic: Topic, text: string, { delay = DEFAULT_UP_DELAY }: { delay?: number } = {}): void {
+     async up(topic: Topic, text: string, { delay = DEFAULT_UP_DELAY, callback = undefined }: LibTypes.Args.ForumClient.UpOptions = {}): Promise<void> {
+        this._client.assertConnected();
+        topic._rejectIfNonexistent(await request(topic.url, { curl: true }));
+        
         if (delay < MINIMAL_UP_DELAY) {
             throw new ValueError(`Up delay must be greater than ${MINIMAL_UP_DELAY} seconds.`);
+        }
+
+        if (!callback) {
+            callback = async (post: Post) => await this.deletePost(post);
         }
 
         let post: Post | undefined = undefined;
 
         this._interval = setInterval(async () => { 
             if (post) {
-                await this.deletePost(post);
+                await callback(post);
             }
             await sleep(SECOND_DELAY / 2);
             post = await this.postMessage(topic, text);
@@ -181,12 +192,12 @@ export default class ForumClient {
     }
 
     /**
-     * Arrête le *up* en cours d'un topic (voir {@link ForumClient.up}). Si pas de *up* en cours, ne fait rien.
+     * Arrête le *up* en cours d'un topic (voir {@link ForumClient.up | `ForumClient.up`}). Si pas de *up* en cours, ne fait rien.
      */
     stopUp(): void {
         if (this._interval) {
-            clearInterval(this._interval)
-            this._interval = null;
+            clearInterval(this._interval);
+            this._interval = undefined;
         }
     }
 
@@ -203,16 +214,16 @@ export default class ForumClient {
      *
      * @param {Post} post
      * @return {Promise<void>}
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le post n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le post n'appartient pas au compte
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le post n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le post n'appartient pas au compte
      */
     async deletePost(post: Post): Promise<void> {
         this._client.assertConnected();
 
-        const hashRes = await request(post.url, { cookies: this._client.session, curl: true });
+        const hashRes = await request(post.url, { cookies: this._client.session, curl: true, allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.GONE] });
 
-        post._rejectIfInexistent(hashRes);
+        post._rejectIfNonexistent(hashRes);
 
         const $ = load(await hashRes.text());
         const hash = $(SELECTORS["hashModeration"]).attr("value")!;
@@ -223,16 +234,16 @@ export default class ForumClient {
         }
 
         const response = await request(POST_MODERATION_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "url", curl: true });
-        this.detectAjaxError(response);
+        await this.detectAjaxError(response);
     }
 
     /**
      * Supprime le topic.
      *
      * @param {Topic} topic
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async deleteTopic(topic: Topic): Promise<void> {
@@ -246,9 +257,9 @@ export default class ForumClient {
      * Change l'état de résolution du topic (résolu -> non-résolu ou non-résolu -> résolu).
      *
      * @param {Topic} topic
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async toggleTopicResolution(topic: Topic): Promise<void> {
@@ -256,7 +267,7 @@ export default class ForumClient {
 
         const hashRes = await request(topic.url, { cookies: this._client.session, curl: true });
 
-        topic._rejectIfInexistent(hashRes);
+        topic._rejectIfNonexistent(hashRes);
 
         const $ = load(await hashRes.text());
         const hash = $(SELECTORS["hashMessage"]).attr("value")!;
@@ -266,7 +277,7 @@ export default class ForumClient {
         };
 
         const response = await request(RESOLVE_TOPIC_URL, { method: "POST", data, cookies: this._client.session, bodyMode: "url", curl: true });
-        this.detectAjaxError(response);
+        await this.detectAjaxError(response);
     }
 
     /**
@@ -274,16 +285,16 @@ export default class ForumClient {
      *
      * @param {Topic} topic
      * @param {string} reason raison du lock
-     * @throws {@link errors.NotConnected | NotConnected} si le client n'est pas connecté
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
-     * @throws {@link errors.JvcErrorMessage | JvcErrorMessage} si le topic n'appartient pas au compte
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
+     * @throws {@link errors.JvcErrorMessage | `JvcErrorMessage`} si le topic n'appartient pas au compte
      * @return {Promise<void>}
      */
     async lockTopic(topic: Topic, reason: string): Promise<void> {
         this._client.assertConnected();
 
         const hashRes = await request(topic.url, { cookies: this._client.session, curl: true });
-        topic._rejectIfInexistent(hashRes);
+        topic._rejectIfNonexistent(hashRes);
 
         const $ = load(await hashRes.text());
         const hash = $(SELECTORS["hashModeration"]).attr("value")!;
@@ -297,6 +308,6 @@ export default class ForumClient {
         };
 
         const response = await request(TOPIC_MODERATION_URL, { method: "POST", cookies: this._client.session, data, bodyMode: "url", curl: true });
-        this.detectAjaxError(response);
+        await this.detectAjaxError(response);
     }
 }

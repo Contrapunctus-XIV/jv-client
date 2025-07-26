@@ -3,7 +3,7 @@
  */
 
 import { load } from "cheerio";
-import { InexistentContent } from "../errors.js";
+import { NonexistentContent } from "../errors.js";
 import { request } from "../requests.js";
 import { CDV_URL, HTTP_CODES, SELECTORS } from "../vars.js";
 import Client from "./Client.js";
@@ -174,9 +174,9 @@ export default class Alias {
      * @returns {void}
      * @hidden
      */
-    private _rejectIfInexistent(response: Response): void {
+    private _rejectIfNonexistent(response: Response): void {
         if (response.status === HTTP_CODES.NOT_FOUND) {
-            throw new InexistentContent(`Le compte d'alias ${this._alias} n'existe pas.`);
+            throw new NonexistentContent(`Le compte d'alias ${this._alias} n'existe pas.`);
         }
     }
 
@@ -194,12 +194,12 @@ export default class Alias {
      * Renvoie un booléen à `true` si le compte est banni, `false` sinon.
      * 
      * @returns {Promise<boolean>}
-     * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le compte n'existe pas
      */
     async isBanned(): Promise<boolean> {
         const response = await request(this._url, { curl: true });
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
         const $ = load(await response.text());
         const isBanned = $(SELECTORS["alert"]).length > 0; // présence d'une div .alert si bannissement
         return isBanned;
@@ -209,8 +209,8 @@ export default class Alias {
      * Renvoie l'ID du compte. Nécessite un client connecté.
      *
      * @param {Client} client instance connectée de `Client`
-     * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
-     * @throws {@link errors.NotConnected | NotConnected} si le client fourni n'est pas connecté
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le compte n'existe pas
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client fourni n'est pas connecté
      * @returns {Promise<number | undefined>}
      */
     async getID(client: Client): Promise<number | undefined> {
@@ -218,7 +218,7 @@ export default class Alias {
 
         const response = await request(this._url, { cookies: client.session, curl: true });
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
         let url;
 
         const $ = load(await response.text());
@@ -251,7 +251,7 @@ export default class Alias {
     /**
      * Renvoie les informations du compte obtenues depuis sa page de profil.
      * 
-     * @throws {@link errors.InexistentContent | InexistentContent} si le compte n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le compte n'existe pas
      * @returns {Promise<JVCTypes.CDV.Infos>}
      */
     async getInfos(): Promise<JVCTypes.CDV.Infos> {
@@ -272,7 +272,7 @@ export default class Alias {
     
         const response = await request(this._url, { curl: true });
     
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
     
         const html = await response.text();
         const $ = load(html);

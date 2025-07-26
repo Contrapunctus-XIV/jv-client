@@ -2,15 +2,15 @@
  * @module classes
  */
 
-import { InexistentContent } from "../errors.js";
+import { NonexistentContent } from "../errors.js";
 import { request } from "../requests.js";
 import { API_DOMAIN, DOMAIN, FORUMS_PAGE, HTTP_CODES, POLL_SELECTORS, SECOND_DELAY, TOPIC_POST_SELECTORS, TOPIC_SELECTORS, URL_PLACEHOLDER } from "../vars.js";
 import Forum from "./Forum.js";
 import { load } from "cheerio";
-import { checkInteger, convertJVCStringToDate, sleep } from "../utils.js";
+import { checkInteger, convertJVCStringToDate, decodeAllJvCare, sleep } from "../utils.js";
 import JVCode from "../scrapers/JVCode.js";
 import Post from "./Post.js";
-import { JVCTypes, V4Types } from "../types/index.js";
+import { JVCTypes, LibTypes } from "../types/index.js";
 
 /**
  * Représente un topic.
@@ -62,9 +62,9 @@ export default class Topic {
     /**
      * @hidden
      */
-    _rejectIfInexistent(response: Response) {
+    _rejectIfNonexistent(response: Response) {
         if (response.status === HTTP_CODES.NOT_FOUND || response.status === HTTP_CODES.GONE || response.url === FORUMS_PAGE) {
-            throw new InexistentContent(`Topic of ID ${this._id} does not exist.`);
+            throw new NonexistentContent(`Topic of ID ${this._id} does not exist.`);
         }
     }
 
@@ -84,12 +84,12 @@ export default class Topic {
     /**
      * Renvoie une instance de la classe {@link Forum} représentant le forum auquel le topic appartient.
      *
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {Promise<Forum>}
      */
     async getForum(): Promise<Forum> {
         const response = await request(this._api_url, { curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
         
         return new Forum(Forum._getIdFromURL(response.url));
     }
@@ -102,19 +102,20 @@ export default class Topic {
     async doesTopicExist(): Promise<boolean> {
         const response = await request(this._api_url, { allowedStatusErrors: [HTTP_CODES.NOT_FOUND, HTTP_CODES.GONE], curl: true });
         
-        return response.ok;
+        return response.ok && response.url !== FORUMS_PAGE;
     }
 
     /**
      * Renvoie l'URL exacte du topic.
      *
-     * @param {boolean} [api=false] si `true`, renvoie l'URL du topic sur l'API `v4`. Par défaut `false`.
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @param {LibTypes.Args.ForumTopic.UseApi} [options]
+     * @param {boolean} [options.api] si `true`, renvoie l'URL du topic sur l'API `v4`. Par défaut `false`.
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {Promise<string>}
      */
-    async getRealURL(api: boolean = false): Promise<string> {
+    async getStandardURL({ api = false }: LibTypes.Args.ForumTopic.UseApi = {}): Promise<string> {
         const response = await request(this._api_url, { curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         return api ? response.url : response.url.replace(API_DOMAIN, DOMAIN);
     }
@@ -122,32 +123,39 @@ export default class Topic {
     /**
      * Renvoie un objet contenant des informations sur le topic.
      *
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {Promise<JVCTypes.Topic.Infos>}
      */
     async getInfos(): Promise<JVCTypes.Topic.Infos> {
-        const response = await request(this._api_url, { curl: true });
-        this._rejectIfInexistent(response);
+        const response = await request(this._url, { curl: true });
+        this._rejectIfNonexistent(response);
 
         const $ = load(await response.text());
-        const title = $(TOPIC_SELECTORS["title"]).first().text().trim();
+        decodeAllJvCare($);
+        const title = $(TOPIC_SELECTORS["title"]).text().trim();
         const author = $(TOPIC_SELECTORS["author"]).first().text().trim();
         const publicationDate = convertJVCStringToDate($(TOPIC_SELECTORS["publicationDate"]).first().text().trim())!;
         const forumId = Forum._getIdFromURL(response.url);
         const pageControl = $(TOPIC_SELECTORS["nbPages"]);
-        const nbPages = pageControl.length > 0 ? parseInt(pageControl.last().text().trim()) : 1;
+        const nbPages = pageControl.length > 0 ? Topic._getPageFromUrl(pageControl.attr("href")!) : 1;
+        const lockEl = $(TOPIC_SELECTORS["lockReason"]);
+        const resolved = $(TOPIC_SELECTORS["resolved"]).first().text().includes("résolu");
 
-        const poll = $(POLL_SELECTORS["bloc"]);
+        const lastPage = await request(this.setUrlPage(nbPages, this._api_url), { curl: true });
+        const $2 = load(await lastPage.text());
+        const lastAnswerDate = convertJVCStringToDate($2(TOPIC_SELECTORS["publicationDateApi"]).last().text().trim())!;
+        
+        const poll = $2(POLL_SELECTORS["bloc"]);
         const pollData: JVCTypes.Topic.Poll = {
             title: "",
             answers: []
         };
 
         if (poll.length > 0) {
-            const pollTitle = poll.find(POLL_SELECTORS["title"]).text().trim().replace("Sondage : ", "");
+            const pollTitle = poll.find(POLL_SELECTORS["title"]).text().replace("Sondage : ", "").trim();
             const answersEl = poll.find(POLL_SELECTORS["answers"]);
             const pollAnswers = answersEl.get().map((x, i) => {
-                const el = $(x);
+                const el = $2(x);
                 const text = el.first().contents().filter((i, x) => {
                     return x.type === 'text';
                 }).text().trim();
@@ -163,10 +171,6 @@ export default class Topic {
             pollData.answers = pollAnswers;
         }
 
-        const lastPage = await request(this.setUrlPage(nbPages, this._api_url), { curl: true });
-        const $2 = load(await lastPage.text());
-        const lastAnswerDate = convertJVCStringToDate($2(TOPIC_SELECTORS["publicationDate"]).last().text().trim())!;
-        
         return {
             id: this.id,
             url: response.url.replace(API_DOMAIN, DOMAIN),
@@ -176,27 +180,29 @@ export default class Topic {
             lastAnswerDate,
             nbPages,
             forumId,
+            resolved,
             ...(poll.length > 0 ? { poll: pollData } : {}),
+            ...(lockEl.length > 0 ? { lockReason: lockEl.text().trim() } : {})
         }
     }
 
     /**
      * Renvoie le nombre de connectés au topic.
      *
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {Promise<number>}
      */
     async getConnected(): Promise<number> {
         const response = await request(this._url, { curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
         const $ = load(await response.text());
 
         return parseInt($(TOPIC_SELECTORS["connected"]).text().trim().split(" ")[0]);
     }
 
-    private parsePosts($: cheerio.Root, raw: true): JVCTypes.Topic.Post[];
-    private parsePosts($: cheerio.Root, raw?: boolean): Post[];
-    private parsePosts($: cheerio.Root, raw = false) {
+    private parsePosts($: cheerio.Root, options: LibTypes.Args.Raw): JVCTypes.Topic.Post[];
+    private parsePosts($: cheerio.Root, options?: LibTypes.Args.NotRaw): Post[];
+    private parsePosts($: cheerio.Root, { raw = false }: LibTypes.Args.NotRaw = {}) {
         const posts = $(TOPIC_POST_SELECTORS["class"]);
         const parsedPosts = posts.get().map((x, i): JVCTypes.Topic.Post | Post => {
             const el = $(x);
@@ -223,20 +229,20 @@ export default class Topic {
         return parsedPosts as Post[] | JVCTypes.Topic.Post[];
     }
 
-    private readPage(page: number, options: { raw: true }): Promise<JVCTypes.Topic.Post[]>;
-    private readPage(page: number, options?: { raw?: boolean }): Promise<Post[]>;
-    private async readPage(page: number, { raw = false } = {}): Promise<JVCTypes.Topic.Post[] | Post[]> {
+    private readPage(page: number, options: LibTypes.Args.Raw): Promise<JVCTypes.Topic.Post[]>;
+    private readPage(page: number, options?: LibTypes.Args.NotRaw): Promise<Post[]>;
+    private async readPage(page: number, { raw = false }: LibTypes.Args.NotRaw = {}): Promise<JVCTypes.Topic.Post[] | Post[]> {
         const url = this.setUrlPage(page, this._api_url);
         const response = await request(url, { curl: true });
 
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         if (Topic._getPageFromUrl(response.url) !== page) {
             return [];
         }
 
         const $ = load(await response.text());
-        const parsedPosts = this.parsePosts($, raw);
+        const parsedPosts = this.parsePosts($, { raw });
 
         return parsedPosts;
     }
@@ -244,19 +250,19 @@ export default class Topic {
     /**
      * @hidden
      */
-    read(options: JVCTypes.Request.Options & { page: number, raw: true }): Promise<JVCTypes.Topic.Post[]>;
+    read(options: LibTypes.Args.RawAndPage): Promise<JVCTypes.Topic.Post[]>;
     /**
      * @hidden
      */
-    read(options: JVCTypes.Request.Options & { page: number }): Promise<Post[]>;
+    read(options: LibTypes.Args.Page): Promise<Post[]>;
     /**
      * @hidden
      */
-    read(options: JVCTypes.Request.Options & { raw: true }): AsyncGenerator<JVCTypes.Topic.Post[], void, unknown>;
+    read(options: LibTypes.Args.RawAndPaging): AsyncGenerator<JVCTypes.Topic.Post[], void, unknown>;
     /**
      * @hidden
      */
-    read(options?: JVCTypes.Request.Options): AsyncGenerator<Post[], void, unknown>;
+    read(options?: LibTypes.Args.Paging): AsyncGenerator<Post[], void, unknown>;
     /**
      * Renvoie un générateur asynchrone des messages postés sur le topic situés aux pages décrites par le paramètre `paging`.
      *
@@ -267,13 +273,13 @@ export default class Topic {
      *      console.log(page);
      * }
      * ```
-     * @param {{ paging?: V4Types.Request.Paging, raw?: boolean }} [options]
+     * @param {LibTypes.Args.Paging} [options]
      * @param {JVCTypes.Request.Paging} [options.paging] objet décrivant les pages à traiter (par défaut vide : toutes les pages le sont)
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Topic.Post}), `false` pour utiliser les classes fournies par la librairie ({@link Post})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Topic.Post | `JVCTypes.Topic.Post`}), `false` pour utiliser les classes fournies par la librairie ({@link Post | `Post`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {(AsyncGenerator<Post[] | JVCTypes.Topic.Post[], void, unknown>)}
      */
-    read(options?: { paging?: V4Types.Request.Paging, raw?: boolean }): AsyncGenerator<Post[] | JVCTypes.Topic.Post[], void, unknown>;
+    read(options?: LibTypes.Args.Paging): AsyncGenerator<Post[] | JVCTypes.Topic.Post[], void, unknown>;
     /**
      * Renvoie les messages postés sur le topic situés à une page particulière.
      *
@@ -282,14 +288,14 @@ export default class Topic {
      * const topic = new Topic(75276105);
      * console.log(await topic.read({ page: 2 }));
      * ```
-     * @param {{ page: number, raw?: boolean }} options
+     * @param {LibTypes.Args.Page} options
      * @param {number} options.page numéro de la page à traiter
-     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Topic.Post}), `false` pour utiliser les classes fournies par la librairie ({@link Post})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @param {boolean} [options.raw] `true` pour renvoyer des objets JSON brut ({@link JVCTypes.Topic.Post | `JVCTypes.Topic.Post`}), `false` pour utiliser les classes fournies par la librairie ({@link Post | `Post`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {(Promise<Post[] | JVCTypes.Topic.Post[]>)}
      */
-    read(options: { page: number, raw?: boolean }): Promise<Post[] | JVCTypes.Topic.Post[]>;
-    read({ raw = false, page, paging = {} }: JVCTypes.Request.Options = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
+    read(options: LibTypes.Args.Page): Promise<Post[] | JVCTypes.Topic.Post[]>;
+    read({ raw = false, page, paging = {} }: LibTypes.Args.PageOrPaging = {}): Promise<any> | AsyncGenerator<any, void, unknown> {
         if (page !== undefined) {
             return this.readPage(page, { raw });
         }
@@ -315,11 +321,11 @@ export default class Topic {
     /**
      * @hidden
      */
-    listen(options: { raw: true }): AsyncGenerator<JVCTypes.Topic.Post, void, unknown>;
+    listen(options: LibTypes.Args.Raw): AsyncGenerator<JVCTypes.Topic.Post, void, unknown>;
     /**
      * @hidden
      */
-    listen(options?: { raw?: boolean }): AsyncGenerator<Post, void, unknown>;
+    listen(options?: LibTypes.Args.NotRaw): AsyncGenerator<Post, void, unknown>;
     /**
      * Renvoie un générateur asynchrone des nouveaux messages détectés.
      *
@@ -330,12 +336,12 @@ export default class Topic {
      *      console.log(page);
      * }
      * ```
-     * @param {{ raw?: boolean }} [options]
-     * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link JVCTypes.Topic.Post}), `false` pour utiliser les classes fournies par la librairie ({@link Post})
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @param {LibTypes.Args.NotRaw} [options]
+     * @param {boolean} [options.raw] `true` pour renvoyer un objet JSON brut ({@link JVCTypes.Topic.Post | `JVCTypes.Topic.Post`}), `false` pour utiliser les classes fournies par la librairie ({@link Post | `Post`})
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {(AsyncGenerator<Post | JVCTypes.Topic.Post, void, unknown>)}
      */
-    listen(options?: { raw?: boolean }): AsyncGenerator<Post | JVCTypes.Topic.Post, void, unknown>;
+    listen(options?: LibTypes.Args.NotRaw): AsyncGenerator<Post | JVCTypes.Topic.Post, void, unknown>;
     async * listen({ raw = false } = {}) {
         const infos = await this.getInfos();
         let current = infos.nbPages;
@@ -344,10 +350,10 @@ export default class Topic {
         while (true) {
             const url = this.setUrlPage(current, this._api_url);
             const response = await request(url, { curl: true });
-            this._rejectIfInexistent(response);
+            this._rejectIfNonexistent(response);
 
             const $ = load(await response.text());
-            const posts = this.parsePosts($, true);
+            const posts = this.parsePosts($, { raw: true });
             current = Topic._getPageFromUrl(response.url); // numéro de page après redirection
 
             for (const post of posts) {
@@ -369,12 +375,12 @@ export default class Topic {
     /**
      * Renvoie une instance de {@link Post} représentant le message d'origine du topic.
      * 
-     * @throws {@link errors.InexistentContent | InexistentContent} si le topic n'existe pas
+     * @throws {@link errors.NonexistentContent | `NonexistentContent`} si le topic n'existe pas
      * @returns  {Promise<Post>}
      */
     async getFirstPost(): Promise<Post> {
         const response = await request(this._api_url, { curl: true });
-        this._rejectIfInexistent(response);
+        this._rejectIfNonexistent(response);
 
         const $ = load(await response.text());
         const firstPostId = parseInt($(TOPIC_POST_SELECTORS["class"]).first().attr("id")!.split("_")[1]);

@@ -3,10 +3,10 @@
  * @hidden
  */
 
-import { InexistentContent } from "../errors.js";
+import { NonexistentContent } from "../errors.js";
 import { requestApi } from "../requests.js";
 import { uniformize_string } from "../utils.js";
-import { writeFile } from "fs";
+import { writeFile } from "node:fs";
 import { V4Types } from "../types/index.js";
 
 /**
@@ -22,7 +22,7 @@ export default class Config {
 
     private assertInited(): void {
         if (!this._file) {
-            throw new InexistentContent("No file to search in. Please call Config.init first.");
+            throw new NonexistentContent("No file to search in. Please call Config.init first.");
         }
     }
 
