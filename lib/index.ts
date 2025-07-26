@@ -22,7 +22,7 @@ import { requestApi, request, setupCloudflare } from "./requests.js";
  */
 const JVClient = {
     Client, Account, Profile, Forum, Content, Video, V4, NoelShack, ContentComment, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, loadCfClearance: setupCloudflare
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, setupCloudflare
 };
 
 /**
@@ -35,5 +35,5 @@ export default JVClient;
  */
 export {
     Client, Account, Profile, Forum, Content, Video, V4, ContentComment, NoelShack, Game, V4Client, Review, Topic, JVCode,
-    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, setupCloudflare as loadCfClearance
+    Post, ForumClient, Alias, convertJVCStringToDate, decodeJvCare, isValidJVCText, requestApi, request, setupCloudflare
 };
