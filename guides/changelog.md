@@ -40,3 +40,24 @@ title: Notes de version
     * Modification de la fonction {@link classes.Profile.setAvatar | `Profile.setAvatar`} qui accepte désormais en entrée aussi bien un chemin de fichier image qu'une URL d'image ou qu'un `Buffer` d'image
     * Modifications mineures de la documentation
 - **v0.3.1** : modifications mineures de la documentation
+
+## v0.4 (26/07/2025)
+- **v0.4.0** : écriture d'un ensemble de tests qui a permis de détecter des dysfonctionnements, restructuration du typage des arguments, ajout de la fonction {@link requests.setupCloudflare | `setupCloudflare`}
+    * Ajout d'un module de tests qui utilise [`Vitest`](https://vitest.dev/)
+    * Correction d'une erreur dans la classe {@link classes.ForumClient | `ForumClient`} qui empêchait la détection d'échecs *Ajax*
+    * Correction d'une erreur dans la méthode {@link classes.Forum.doesForumExist | `Forum.doesForumExist`} qui était à l'origine de faux positifs
+    * Correction d'une erreur dans la méthode {@link classes.ForumClient.postMessage | `ForumClient.postMessage`} qui ne renvoyait plus un objet {@link classes.Post | `Post`} valide à la suite de la mise à jour des forums JVC
+    * La méthode {@link classes.Post.doesPostExist | `doesPostExist`} nécessite un client connecté pour fonctionner, ce qui a été omis
+    * Correction d'une erreur dans la classe {@link classes.Game | `Game`} qui empêchait la détection de jeux inexistants
+    * Ajout du paramètre optionnel `machineId` dans le constructeur de {@link classes.Game | `Game`} qui permet de fournir une machine par défaut aux méthodes de la classe
+    * Correction d'une erreur dans la classe {@link classes.V4Client | `V4Client`} qui empêchait la détection d'échecs
+    * Correction du type {@link types.V4Types.Games.Summary | `V4Types.Games.Summary`}
+    * Correction d'une erreur dans la fonction {@link utils.convertJVCStringToDate | `convertJVCStringToDate`} lorsque d'une date au format `hh:mm:ss` était passée
+    * Restructuration du typage des arguments des fonctions de la librairie qui se retrouvent désormais dans l'espace de noms {@link types.LibTypes.Args | `LibTypes.Args`}
+    * La méthode {@link classes.Topic.getInfos | `Topic.getInfos`} permet désormais de savoir si un topic est résolu ou *locked*
+    * Ajout de la fonction {@link requests.setupCloudflare | `setupCloudflare`} qui permet de configurer la session Cloudflare pour éviter les erreurs `403 Forbidden`
+    * Renommage de l'erreur `InexistentContent` en {@link errors.NonexistentContent | `NonexistentContent`}
+    * La méthode {@link classes.ForumClient.up | `ForumClient.up`} prend désormais en paramètre optionnel une fonction de rappel à appliquer sur chaque objet {@link classes.Post | `Post`} représentant le message envoyé (paramètre `callback`)
+    * Correction et amélioration de la méthode {@link scrapers.JVCode.htmlToJVCode | `htmlToJVCode`}
+    * Retrait des méthodes `Account.getFavorites` et `Profile.getFavorites`, respectivement divisées en {@link classes.Account.getFavoriteForums | `Account.getFavoriteForums`}, {@link classes.Account.getFavoriteTopics | `Account.getFavoriteTopics`}, {@link classes.Account.getFavoriteGames | `Account.getFavoriteGames`} et {@link classes.Profile.getFavoriteForums | `Profile.getFavoriteForums`}, {@link classes.Profile.getFavoriteTopics | `Profile.getFavoriteTopics`}, {@link classes.Profile.getFavoriteGames | `Profile.getFavoriteGames`}
+    * Modifications mineures de la documentation

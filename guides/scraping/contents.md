@@ -50,14 +50,14 @@ Les catégories de contenus sont subdivisées en **types** qui renseignent la fo
 | Vidéo     | 145        | Vidéo test                | Test d'un jeu                                                                              | [Voir ici](https://www.jeuxvideo.com/videos/1857695/final-fantasy-7-rebirth-est-il-la-renaissance-que-l-on-attendait-tant-apres-ff7-remake.htm)                                        |
 
 ### Événements
-Les publications peuvent également être en rapport avec un événement, comme la *Paris Games Week*. Voir [ici](./config.md#events) pour la liste des événements disponibles.
+Les publications peuvent également être en rapport avec un événement, comme la *Paris Games Week*. Voir [ici](./config.md#événements) pour la liste des événements disponibles.
 
 ### Commentaires
 
 Les utilisateurs de JVC ont la possibilité de poster des commentaires sous les contenus de la rédaction. Il suffira d'utiliser la classe {@link classes.Content | `Content`} pour les récupérer étant donné un contenu.
 
 ### Méthodes
-*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#page-scrapers).*
+*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#fonctionnement-des-page-scrapers).*
 
 #### Classe statique `V4`
 
@@ -73,6 +73,7 @@ Les utilisateurs de JVC ont la possibilité de poster des commentaires sous les 
 
 Cette classe représente un contenu de la rédaction. Le constructeur prend en argument l'ID du contenu.
 
+- {@link classes.Content.doesContentExist | `Content.doesContentExist`} renvoie `true` si le contenu existe, `false` sinon
 - {@link classes.Content.getInfos | `Content.getInfos`} renvoie les informations du contenu
 - {@link classes.Content.getComments | `Content.getComments`}* renvoie les commentaires des utilisateurs postés sous le contenu
 - {@link classes.Content.getRelatedNews | `Content.getRelatedNews`}* renvoie les actualités associées au contenu
@@ -87,6 +88,7 @@ Cette classe hérite de `Content` et contient les mêmes méthodes que celles d�
 
 Cette classe représente un commentaire d'utilisateur posté sous un contenu de la rédaction. Le constructeur prend en arguments l'ID du commentaire et le contenu parent (ID ou instance de `Content`).
 
+- {@link classes.ContentComment.doesCommentExist | `Content.doesCommentExist`} renvoie `true` si le commentaire existe, `false` sinon
 - {@link classes.ContentComment.getInfos | `ContentComment.getInfos`} renvoie les informations du commentaire
 - {@link classes.ContentComment.getAnswers | `ContentComment.getAnswers`} renvoie les réponses postées sous le commentaire
 

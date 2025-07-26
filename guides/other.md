@@ -17,8 +17,9 @@ Les fonctions exportées par ce module sont :
 Les fonctions exportées par ce module permettent aux utilisateurs d'envoyer des requêtes personnalisées aux services JVC. Elles sont :
 - {@link requests.request | `request`} : effectue une requête à l'URL passée en entrée, avec les options spécifiées. Peut utiliser le logiciel [`cURL`](https://curl.se/docs/manpage.html) pour contourner les restrictions Cloudflare des serveurs JVC.
 - {@link requests.requestApi | `requestApi`} : effectue une requête à l'*endpoint* de l'API `v4` passé en entrée, avec les options spécifiées.
+- {@link requests.setupCloudflare | `setupCloudflare`} : configure les données de la session Cloudflare pour éviter les erreurs `403 Forbidden`. Plus d'informations [ici](./quickstart.md#contournement-de-cloudflare).
 
 ## Classe `NoelShack`
 La classe {@link classes.NoelShack | `NoelShack`} est une classe statique contenant deux méthodes qui permettent d'interagir avec le site d'hébergement d'images [NoelShack](https://www.noelshack.com/) utilisé sur les forums de JVC. Elles sont :
-- {@link classes.NoelShack.upload | `upload`} : téléverse sur NoelShack l'image passée en entrée.
-- {@link classes.NoelShack.uploadMosaic | `uploadMosaic`} : réalise une mosaïque de l'image passée en entrée et la téléverse sur NoelShack.
+- {@link classes.NoelShack.upload | `NoelShack.upload`} : téléverse sur NoelShack l'image passée en entrée.
+- {@link classes.NoelShack.uploadMosaic | `NoelShack.uploadMosaic`} : réalise une mosaïque de l'image passée en entrée et la téléverse sur NoelShack.

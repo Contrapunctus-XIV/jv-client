@@ -34,12 +34,13 @@ Ce sont des contenus textuels qui sont postés par les utilisateurs de JVC sur u
 Le `JVCode` est la syntaxe développé par l'équipe de JVC qui permet aux utiliseurs de styliser leurs messages (souligner, mettre en italique, faire des listes, etc.). La librairie fournit une classe statique capable de restituer le JVCode à l'origine du contenu HTML d'un message et vice-versa.
 
 ### Méthodes
-*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#page-scrapers).*
+*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#fonctionnement-des-page-scrapers).*
 
 #### Classe `Forum`
 
 Le constructeur de la classe `Forum` prend en argument l'ID du forum.
 
+- {@link classes.Forum.doesForumExist | `Forum.doesForumExist`} renvoie `true` si le forum existe, `false` sinon
 - {@link classes.Forum.getForumTitle | `Forum.getForumTitle`} renvoie le nom du forum
 - {@link classes.Forum.getConnected | `Forum.getConnected`} renvoie le nombre actuel de connectés au forum
 - {@link classes.Forum.readTopics | `Forum.readTopics`}* renvoie les topics postés sur le forum
@@ -50,6 +51,7 @@ Le constructeur de la classe `Forum` prend en argument l'ID du forum.
 
 Le constructeur de la classe `Topic` prend en argument l'ID du topic.
 
+- {@link classes.Topic.doesTopicExist | `Topic.doesTopicExist`} renvoie `true` si le topic existe, `false` sinon
 - {@link classes.Topic.getInfos | `Topic.getInfos`} renvoie un objet contenant des informations sur le topic
 - {@link classes.Topic.getForum | `Topic.getForum`} renvoie le forum auquel le topic appartient sous forme d'instance de la classe `Forum`
 - {@link classes.Topic.getConnected | `Topic.getConnected`} renvoie le nombre actuel de connectés au topic
@@ -61,10 +63,11 @@ Le constructeur de la classe `Topic` prend en argument l'ID du topic.
 
 Le constructeur de la classe `Post` prend en argument l'ID du message.
 
+- {@link classes.Post.doesPostExist | `Post.doesPostExist`} renvoie `true` si le post existe, `false` sinon
 - {@link classes.Post.getInfos | `Post.getInfos`} renvoie un objet contenant des informations sur le message
 
 > [!IMPORTANT]
-> Cette méthode recquiert en argument un client connecté.
+> Ces deux méthodes recquièrent en argument un client connecté.
 
 #### Classe statique `JVCode`
 

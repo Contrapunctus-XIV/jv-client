@@ -22,7 +22,7 @@ Les utilisateurs de JVC ont la possibilité de poster des avis sur les jeux vid�
 
 ### Méthodes
 
-*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#page-scrapers).*
+*Les méthodes suivies d'une astérisque sont des [page scrapers](../scraping.md#fonctionnement-des-page-scrapers).*
 
 #### Classe statique `V4`
 
@@ -34,6 +34,7 @@ Les utilisateurs de JVC ont la possibilité de poster des avis sur les jeux vid�
 
 Représente un jeu vidéo. Le constructeur prend en argument l'ID du jeu.
 
+- {@link classes.Game.doesGameExist | `Game.doesGameExist`} renvoie `true` si le jeu existe, `false` sinon
 - {@link classes.Game.getInfos | `Game.getInfos`} renvoie les informations du jeu
 - {@link classes.Game.getDetails | `Game.getDetails`} renvoie des informations approfondies sur le jeu
 - {@link classes.Game.getLightInfos | `Game.getLightInfos`} renvoie des informations génériques sur le jeu
@@ -48,6 +49,7 @@ Représente un jeu vidéo. Le constructeur prend en argument l'ID du jeu.
 
 Représente un avis d'un utilisateur de JVC. Le constructeur prend en arguments l'ID de l'avis, le jeu (ID ou instance de `Game`) et l'ID de la machine concernée par l'avis.
 
+- {@link classes.Review.doesReviewExist | `Review.doesReviewExist`} renvoie `true` si l'avis existe, `false` sinon
 - {@link classes.Review.getInfos | `Review.getInfos`} renvoie les informations de l'avis
 
 #### Exemples

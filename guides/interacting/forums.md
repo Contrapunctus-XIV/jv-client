@@ -3,7 +3,7 @@ title: Forums
 ---
 
 ## Interagir avec les forums JVC
-### ForumClient
+### La classe `ForumClient`
 La classe {@link classes.ForumClient | `ForumClient`} permet d'interagir avec les forums et topics de JVC. Son constructeur prend en entrée une instance connectée de la classe {@link classes.Client | `Client`}.
 
 - {@link classes.ForumClient.postTopic | `ForumClient.postTopic`} pour poster un topic

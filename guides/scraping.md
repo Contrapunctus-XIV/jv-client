@@ -12,8 +12,6 @@ showGroups: true
 # Extraction de données — Introduction
 Cette librairie permet d'automatiser la récupération de données portant sur les contenus hébergés sur la plateforme JVC. Il s'agit, entre autres, des articles, actualités, tests de jeu, vidéos, avis des utilisateurs, jeux vidéo, forums, topics, etc.
 
-<div id="page-scrapers"></div>
-
 ## Fonctionnement des *page scrapers*
 Les *page scrapers* sont des fonctions de la librairie destinées à la récupération de données hébergées sur JVC. Elles procèdent par itération sur les pages de résultats de la requête. Ce sont les fonctions de la classe statique {@link scrapers.V4 | `V4`}, certaines méthodes des classes {@link classes.Content | `Content`} et {@link classes.Game | `Game`} ou encore les fonctions {@link classes.Forum.readTopics | `Forum.readTopics`} et {@link classes.Topic.read | `Topic.read`}.
 
@@ -64,6 +62,6 @@ for await (const page of V4.getGames({ raw: true })) {
 
 Ici, `page` sera du type {@link types.V4Types.Games.Raw | `V4Types.Games.Raw`}.
 
-### Query
+### *Query*
 
 Enfin, les *page scrapers* de la classe statique {@link scrapers.V4 | `V4`} contiennent un paramètre supplémentaire, le paramètre `query`, qui prend un objet associant aux critères de recherche appropriés la valeur souhaitée pour affiner les résultats.
