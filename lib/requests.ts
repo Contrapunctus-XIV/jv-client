@@ -204,9 +204,9 @@ function convertRequestIntoCurl(request: Request, body: LibTypes.Requests.BodyTy
             }
             request.headers.set("Content-Type", "multipart/form-data");
         } else if (body instanceof URLSearchParams) {
-            command += ` -d "${body.toString()}"`;
+            command += ` -d "${body.toString().replaceAll("\"", "\\\"")}"`;
         } else {
-            command += ` -d "${body}"`;
+            command += ` -d "${body.replaceAll("\"", "\\\"")}"`;
         }
     }
 
