@@ -25,3 +25,7 @@ La classe {@link classes.Profile | `Profile`} permet de récupérer et de modifi
 * {@link classes.Profile.getForumPosts | `Profile.getForumPosts`} pour obtenir les posts du compte
 > [!WARNING]
 > Cette méthode utilise les pages de profil publiques de JVC qui sont sujettes à une limite de requêtes se situant à environ 3 par seconde. Il est donc recommandé d'utiliser une alternative dans le cas où un grand nombre de requêtes doivent être effectuées.
+* {@link classes.Profile.getParams | `Profile.getParams`} pour obtenir les paramètres associés au profil JVC, obtensibles depuis l'icône *Réglages* de la page de profil (`/sso/infos_pseudo.php`)
+* {@link classes.Profile.setParams | `Profile.setParams`} pour modifier un ou plusieurs de ces paramètres
+* {@link classes.Profile.setSignature | `Profile.setSignature`} pour modifier la signature du compte
+* {@link classes.Profile.isLevelLimitReached | `Profile.isLevelLimitReached`} pour savoir si le compte a atteint sa limite quotidienne de posts ou de topics

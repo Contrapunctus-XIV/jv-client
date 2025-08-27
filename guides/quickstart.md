@@ -53,3 +53,6 @@ import jv from "jv-client";
 
 jv.setupCloudflare("<CF_CLEARANCE>", "<USER_AGENT>");
 ```
+
+> [!IMPORTANT]
+> Il est nécessaire que l'adresse IP avec laquelle vous utilisez la librairie (celle qui sera à l'origine des requêtes vers JVC) soit la même que celle avec laquelle vous avez obtenu le cookie `cf_clearance`.

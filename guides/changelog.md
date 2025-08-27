@@ -63,3 +63,4 @@ title: Notes de version
     * Modifications mineures de la documentation
 - **v0.4.1** : correction d'une erreur qui empêchait la fonction {@link requests.setupCloudflare | `setupCloudflare`} d'être importée
 - **v0.4.2** : correction d'une erreur qui empêchait la librairie `sharp` d'être importée
+- **v0.4.3** : ajout des fonctions {@link classes.Profile.getParams | `Profile.getParams`}, {@link classes.Profile.setParams | `Profile.setParams`}, {@link classes.Profile.setSignature | `Profile.setSignature`} et {@link classes.Profile.isLevelLimitReached | `Profile.isLevelLimitReached`}, ainsi que des typages associés
