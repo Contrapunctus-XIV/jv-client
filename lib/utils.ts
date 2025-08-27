@@ -131,6 +131,22 @@ export function convertJVCStringToDate(dateString: string): Date | undefined {
 }
 
 /**
+ * @hidden
+ * 
+ * @param $ 
+ * @returns 
+ */
+export function readAlert($: cheerio.Root): string | undefined {
+    const alerts = $(`${SELECTORS["alert"]}, ${SELECTORS["error"]}`);
+    if (alerts.length > 0) {
+        const message = alerts.map((_i, a) => $(a).text().trim()).get().join(" ");
+        return message;
+    }
+
+    return undefined;
+}
+
+/**
  * Renvoie un lien obtenu après décodage de la classe `JvCare` passée en entrée.
  * `JvCare` est un mécanisme d'obfusquation développé par JVC et destiné à masquer les liens situés dans une page HTML obtenue après une requête
  * effectuée avec une API comme `fetch`.
