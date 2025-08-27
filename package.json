@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "test": "vitest",
-    "build": "tsc",
+    "build": "rimraf dist & tsc",
     "docs": "typedoc lib/**/* lib/index.ts --name API --readme lib/index.md --json api.json & rimraf docs & typedoc --entryPointStrategy merge api.json --alwaysCreateEntryPointModule --projectDocuments guides/quickstart.md --projectDocuments guides/scraping.md --projectDocuments guides/interact.md --projectDocuments guides/other.md --projectDocuments guides/changelog.md & rimraf api.json"
   },
   "module": "./dist/index.js",
