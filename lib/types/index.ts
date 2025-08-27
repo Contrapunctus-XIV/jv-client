@@ -786,6 +786,59 @@ declare namespace JVCTypes {
             mini: string;
         }
     }
+
+    namespace ProfileParams {
+        type ProfileScope = "prive" | "public" | "abonnes";
+
+        interface ProfileParams {
+            profil_age: ProfileScope;
+            profil_sexe: ProfileScope;
+            profil_pays: ProfileScope;
+            profil_ville: ProfileScope;
+            profil_date_creation: ProfileScope;
+            profil_date_passage: ProfileScope;
+            profil_nombre_messages: ProfileScope;
+            profil_nombre_commentaires: ProfileScope;
+            profil_historique_messages: ProfileScope;
+            profil_historique_commentaires: ProfileScope;
+            profil_alias: ProfileScope;
+            profil_droit_abonne: ProfileScope;
+            profil_description: ProfileScope;
+            profil_gamer_machines: ProfileScope;
+            profil_gamer_genre_jeux: ProfileScope;
+            profil_gamer_identifiants: ProfileScope;
+            "identifiants[psn]": string;
+            "identifiants[xbox live]": string;
+            "identifiants[nintendonetwork]": string;
+            "identifiants[nintendo3DS]": string;
+            "identifiants[steam]": string;
+            "identifiants[gamecenter]": string;
+            "identifiants[origin]": string;
+            profil_social_networks: ProfileScope;
+            "reseaux[twitter]": string;
+            "reseaux[youtube]": string;
+            "reseaux[twitch]": string;
+            "reseaux[lastfm]": string;
+            "messageries[skype]": string;
+            profil_skype: ProfileScope;
+            "liens[]": string;
+            profil_liens_libres: string;
+            description: string;
+            signature: string;
+        }
+
+        interface RawProfileParams extends ProfileParams {
+            fs_session: string;
+            fs_timestamp: string;
+            fs_version: string;
+            [fs_hash: string]: string;
+        }
+
+        interface RawParamsAndUrl {
+            params: RawProfileParams;
+            url: string;
+        }
+    }
 }
 
 declare namespace LibTypes {
@@ -942,10 +995,16 @@ declare namespace LibTypes {
             interface FavoriteOptions {
                 mode?: "add" | "update" | "remove"
             }
+
+            /**
+             * @inline
+             */
+            interface LevelLimitOptions {
+                mode?: "topic" | "post";
+            }
         }
 
         namespace V4Client {
-
             /**
              * @inline
              */

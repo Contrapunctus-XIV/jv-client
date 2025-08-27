@@ -7,13 +7,14 @@ import { requestApi, request } from '../requests.js';
 import Game from "./Game.js";
 import Forum from "./Forum.js";
 import Topic from "./Topic.js";
-import { decodeJvCare } from "../utils.js";
+import { decodeJvCare, readAlert } from "../utils.js";
 import { JvcErrorMessage } from "../errors.js";
 import Post from "./Post.js";
-import { CDV_POSTS_URL, MAXIMUM_PER_PAGE, SELECTORS } from "../vars.js";
+import { CDV_POSTS_URL, EDIT_ACCOUNT_URL, MAXIMUM_PER_PAGE, SELECTORS, TOPIC_TEST_URL } from "../vars.js";
 import { load } from "cheerio";
-import { LibTypes, V4Types } from "../types/index.js";
+import { JVCTypes, LibTypes, V4Types } from "../types/index.js";
 import { readFileSync } from "node:fs";
+import ForumClient from "./ForumClient.js";
 
 /**
  * Classe permettant des opérations sur le profil public d'un compte JVC. Utilise l'API `v4` et nécessite un {@link Client} connecté.
@@ -365,6 +366,125 @@ export default class Profile {
             }
 
             url = decodeJvCare(nextPageBtn.attr("class")!);
+        }
+    }
+
+    // machines, jeux, forums, topics pas pris en compte
+    private async getRawParams(): Promise<JVCTypes.ProfileParams.RawParamsAndUrl> {
+        this._client.assertConnected();
+
+        const id = (await this.getInfos()).id;
+        const response = await request(EDIT_ACCOUNT_URL, { curl: true, query: { id }, cookies: this._client.session });
+        const $ = load(await response.text());
+        const alert = readAlert($);
+
+        if (alert) {
+            throw new JvcErrorMessage(alert);
+        }
+
+        const form = $(SELECTORS["editProfileForm"]);
+        
+        const data: Record<string, string> = {};
+        form.find(SELECTORS["editProfileInputs"]).filter((_i, element) => {
+            const type = $(element).attr("type");
+            const name = $(element).attr("name");
+            if (!name) {
+                return false;
+            }
+            return !(type === "radio" && !$(element).is(':checked') || type === "file" || type === "checkbox" || type === "search" || name!.includes("ordre_forum"));
+        }).each((_index, element) => {
+            const name = $(element).attr('name');
+            const value = $(element).val();
+            data[name!] = value;
+        });
+
+        form.find(SELECTORS["jvEditor"]).each((_index, element) => {
+            const infos = JSON.parse($(element).attr("data-editor-message")!);
+            data[infos.inputName] = infos.initialText;
+        });
+
+        return { params: data as JVCTypes.ProfileParams.RawProfileParams, url: response.url };
+    }
+
+    /**
+     * Renvoie un objet contenant les paramètres de profil du compte (obtensibles à `/sso/infos_pseudo.php`).
+     * 
+     * @returns {Promise<JVCTypes.ProfileParams.ProfileParams>}
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     */
+    async getParams(): Promise<JVCTypes.ProfileParams.ProfileParams> {
+        this._client.assertConnected();
+
+        const preData = await this.getRawParams();
+        const data = Object.fromEntries(Object.entries(preData.params).filter(([k,v]) => !k.startsWith("fs")));
+
+        return data as unknown as JVCTypes.ProfileParams.ProfileParams;
+    }
+
+    /**
+     * Permet de modifier un ou plusieurs paramètres de profil du compte (obtensibles à `/sso/infos_pseudo.php`).
+     * 
+     * @param {Partial<JVCTypes.ProfileParams.ProfileParams>} params un objet associant les noms des paramètres à leur valeur
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     */
+    async setParams(params: Partial<JVCTypes.ProfileParams.ProfileParams>): Promise<void> {
+        this._client.assertConnected();
+
+        const raw = await this.getRawParams();
+        const data = { ...raw.params, ...params };
+        const response = await request(raw.url, { method: "POST", cookies: this._client.session, curl: true, data, bodyMode: "url" })
+        const $ = load(await response.text());
+        const alert = readAlert($);
+
+        if (alert) {
+            throw new JvcErrorMessage(alert);
+        }
+    }
+
+    /**
+     * Permet de modifier la signature du compte.
+     * 
+     * @param signature la nouvelle signature
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     */
+    async setSignature(signature: string): Promise<void> {
+        this._client.assertConnected();
+
+        await this.setParams({ signature });
+    }
+
+    /**
+     * Renvoie `true` si le compte a atteint sa limite quotidienne de posts ou de topics (système de niveaux).
+     * 
+     * @param {LibTypes.Args.Profile.LevelLimitOptions} [options] 
+     * @param {"topic" | "post"} [options.mode] `"post"` pour la limite quotidienne de posts (par défaut), `"topic"` pour la limite quotidienne de topics
+     * @throws {@link errors.NotConnected | `NotConnected`} si le client n'est pas connecté
+     * @returns 
+     */
+    async isLevelLimitReached({ mode = "post" }: LibTypes.Args.Profile.LevelLimitOptions = {}): Promise<boolean> {
+        this._client.assertConnected();
+
+        if (mode === "post") {
+            const response = await request(TOPIC_TEST_URL, { curl: true, cookies: this._client.session });
+            const $ = load(await response.text());
+            const warning = $(SELECTORS["warning"]);
+            
+            return warning.length > 0;
+        } else {
+            const fc = new ForumClient(this._client);
+            let topic: Topic;
+
+            try {
+                topic = await fc.postTopic(new Forum(5100), "test", "test");
+            } catch (e: any) {
+                if (e instanceof JvcErrorMessage && e.message.includes("limite")) {
+                    return true;
+                }
+                throw e;
+            }
+
+            await fc.deleteTopic(topic);
+            return false;
         }
     }
 }

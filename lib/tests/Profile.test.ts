@@ -1,5 +1,5 @@
 import { expect, describe, test } from "vitest";
-import { ID_TYPE, machineId, profileDescription } from "./vars.js";
+import { ID_TYPE, machineId, profileDescription, profileParams, profileParamsToSet } from "./vars.js";
 import Client from "../classes/Client.js";
 import Profile from "../classes/Profile.js";
 import { NotConnected } from "../errors.js";
@@ -231,5 +231,62 @@ describe("getForumPosts", () => {
         const p = new Profile(new Client());
         const posts = p.getForumPosts();
         await expect(getFirstValueOfAsyncGenerator(posts)).rejects.toThrowError(NotConnected);
+    });
+});
+
+describe("getParams", () => {
+    test("standard", async () => {
+        const params = await global.profile.getParams();
+        expect(params).toMatchObject(profileParams);
+    });
+
+    test("with not connected client", async () => {
+        const p = new Profile(new Client());
+        await expect(p.getParams()).rejects.toThrowError(NotConnected);
+    });
+});
+
+describe("setParams", () => {
+    test("standard", async () => {
+        await global.profile.setParams(profileParamsToSet);
+        const params = await global.profile.getParams();
+        expect(params).toMatchObject(profileParamsToSet);
+        await global.profile.setParams(profileParams);
+    });
+
+    test("with not connected client", async () => {
+        const p = new Profile(new Client());
+        await expect(p.setParams(profileParamsToSet)).rejects.toThrowError(NotConnected);
+    });
+});
+
+describe("setSignature", () => {
+    test("standard", async () => {
+        await global.profile.setSignature(profileParamsToSet.signature);
+        const params = await global.profile.getParams();
+        expect(params.signature).toBe(profileParamsToSet.signature);
+        await global.profile.setSignature(profileParams.signature);
+    });
+
+    test("with not connected client", async () => {
+        const p = new Profile(new Client());
+        await expect(p.setSignature(profileParamsToSet.signature)).rejects.toThrowError(NotConnected);
+    });
+});
+
+describe("isLevelLimitReached", () => {
+    test("standard on topics", async () => {
+        const reached = await global.profile.isLevelLimitReached({ mode: "topic" });
+        expect(reached).toBe(false);
+    });
+
+    test("standard on posts", async () => {
+        const reached = await global.profile.isLevelLimitReached({ mode: "post" });
+        expect(reached).toBe(false);
+    });
+
+    test("with not connected client", async () => {
+        const p = new Profile(new Client());
+        await expect(p.isLevelLimitReached()).rejects.toThrowError(NotConnected);
     });
 });

@@ -8,6 +8,7 @@ import Topic from "../classes/Topic.js";
 import Post from "../classes/Post.js";
 import Game from "../classes/Game.js";
 import Review from "../classes/Review.js";
+import { JVCTypes } from "../types/index.js";
 
 export const ID_TYPE = { id: expect.any(Number) };
 
@@ -31,8 +32,10 @@ export const answer = new ContentComment(17846520, content);
 export const forum = new Forum(51);
 export const testForum = new Forum(5100);
 export const nonexistentForum = new Forum(0);
-export const forumUrl = "https://www.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm";
-export const forumApiUrl = "https://api.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm";
+export const forumUrl =
+  "https://www.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm";
+export const forumApiUrl =
+  "https://api.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm";
 export const forumTitle = "Blabla 18-25 ans";
 
 export const lockReason = "test";
@@ -41,20 +44,22 @@ export const searchString = "test";
 export const topic = new Topic(69508478);
 export const topicToScrape = new Topic(76094343);
 export const topicToScrapeInfos = {
-    id: 76094343,
-    url: 'https://www.jeuxvideo.com/forums/42-5100-76094343-1-0-1-0-test.htm',
-    title: 'TEST',
-    author: 'InBigDespite2',
-    publicationDate: "2025-07-26T15:06:22.000Z",
-    lastAnswerDate: "2025-07-26T15:50:25.000Z",
-    nbPages: 2,
-    forumId: 5100,
-    resolved: false,
-    lockReason: 'test'
+  id: 76094343,
+  url: "https://www.jeuxvideo.com/forums/42-5100-76094343-1-0-1-0-test.htm",
+  title: "TEST",
+  author: "InBigDespite2",
+  publicationDate: "2025-07-26T15:06:22.000Z",
+  lastAnswerDate: "2025-07-26T15:50:25.000Z",
+  nbPages: 2,
+  forumId: 5100,
+  resolved: false,
+  lockReason: "test",
 };
 export const topicForumId = 51;
-export const topicUrl = "https://www.jeuxvideo.com/forums/42-51-69508478-1-0-1-0-moderation-ultime-pas-nous.htm";
-export const topicApiUrl = "https://api.jeuxvideo.com/forums/42-51-69508478-1-0-1-0-moderation-ultime-pas-nous.htm";
+export const topicUrl =
+  "https://www.jeuxvideo.com/forums/42-51-69508478-1-0-1-0-moderation-ultime-pas-nous.htm";
+export const topicApiUrl =
+  "https://api.jeuxvideo.com/forums/42-51-69508478-1-0-1-0-moderation-ultime-pas-nous.htm";
 export const nonexistentTopic = new Topic(0);
 export const topicFirstPostId = 1164212750;
 
@@ -62,20 +67,20 @@ export const post = new Post(1164212750);
 export const postToScrape = new Post(1275350615);
 export const nonexistentPost = new Post(0);
 export const postToScrapeInfos = {
-    id: 1275350615,
-    url: 'https://www.jeuxvideo.com/forums/message/1275350615',
-    author: 'InBigDespite2',
-    date: "2025-07-26T15:06:22.000Z",
-    content: 'test',
-    topicId: 76094343,
-    page: 1
+  id: 1275350615,
+  url: "https://www.jeuxvideo.com/forums/message/1275350615",
+  author: "InBigDespite2",
+  date: "2025-07-26T15:06:22.000Z",
+  content: "test",
+  topicId: 76094343,
+  page: 1,
 };
 
 export const game = new Game(75478);
 export const nonexistentGame = new Game(0);
 export const machineId = 10;
 
-export const newFavoriteForums = new Set([52, 5101])
+export const newFavoriteForums = new Set([52, 5101]);
 export const newFavoriteTopics = new Set([69508478, 71094319]);
 export const newFavoriteGames = new Set([531990, 75478]);
 
@@ -297,3 +302,77 @@ export const jvCareMarkupExpected = `<html><head></head><body><div class="footer
 
 export const jvCare = "JvCare 1F4943CCC24843CBCB43C11F";
 export const jvCareExpected = "/newsletter/";
+
+export const profileParams: JVCTypes.ProfileParams.ProfileParams = {
+  profil_age: "prive",
+  profil_sexe: "prive",
+  profil_pays: "public",
+  profil_ville: "prive",
+  profil_date_creation: "public",
+  profil_date_passage: "abonnes",
+  profil_nombre_messages: "public",
+  profil_nombre_commentaires: "public",
+  profil_historique_messages: "prive",
+  profil_historique_commentaires: "prive",
+  profil_alias: "prive",
+  profil_droit_abonne: "public",
+  profil_description: "public",
+  profil_gamer_machines: "public",
+  profil_gamer_genre_jeux: "public",
+  profil_gamer_identifiants: "prive",
+  "identifiants[psn]": "",
+  "identifiants[xbox live]": "",
+  "identifiants[nintendonetwork]": "",
+  "identifiants[nintendo3DS]": "",
+  "identifiants[steam]": "",
+  "identifiants[gamecenter]": "",
+  "identifiants[origin]": "",
+  profil_social_networks: "prive",
+  "reseaux[twitter]": "",
+  "reseaux[youtube]": "",
+  "reseaux[twitch]": "",
+  "reseaux[lastfm]": "",
+  "messageries[skype]": "",
+  profil_skype: "prive",
+  "liens[]": "",
+  profil_liens_libres: "public",
+  description: "",
+  signature: "",
+};
+
+export const profileParamsToSet: JVCTypes.ProfileParams.ProfileParams = {
+  profil_age: "public",
+  profil_sexe: "prive",
+  profil_pays: "public",
+  profil_ville: "public",
+  profil_date_creation: "public",
+  profil_date_passage: "prive",
+  profil_nombre_messages: "public",
+  profil_nombre_commentaires: "public",
+  profil_historique_messages: "prive",
+  profil_historique_commentaires: "prive",
+  profil_alias: "prive",
+  profil_droit_abonne: "prive",
+  profil_description: "public",
+  profil_gamer_machines: "public",
+  profil_gamer_genre_jeux: "public",
+  profil_gamer_identifiants: "prive",
+  "identifiants[psn]": "test",
+  "identifiants[xbox live]": "test",
+  "identifiants[nintendonetwork]": "test",
+  "identifiants[nintendo3DS]": "",
+  "identifiants[steam]": "",
+  "identifiants[gamecenter]": "",
+  "identifiants[origin]": "",
+  profil_social_networks: "prive",
+  "reseaux[twitter]": "",
+  "reseaux[youtube]": "https://www.youtube.com/user/YouTube",
+  "reseaux[twitch]": "https://www.twitch.tv/twitch",
+  "reseaux[lastfm]": "",
+  "messageries[skype]": "",
+  profil_skype: "public",
+  "liens[]": "",
+  profil_liens_libres: "public",
+  description: "test",
+  signature: "test",
+};
