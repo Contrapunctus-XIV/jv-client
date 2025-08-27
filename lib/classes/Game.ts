@@ -101,7 +101,7 @@ export default class Game {
      */
     _rejectIfNonexistent(response: Response, machine: number | undefined = undefined) {
         if (response.status === HTTP_CODES.NOT_FOUND) {
-            if (machine) {
+            if (machine !== undefined) {
                 throw new NonexistentContent(`Game of ID ${this._id} does not exist on machine ${machine}.`);
             } else {
                 throw new NonexistentContent(`Game of ID ${this._id} does not exist.`);
