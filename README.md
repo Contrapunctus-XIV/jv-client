@@ -8,6 +8,9 @@
 
 [![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/jv-client)
 
+> [!WARNING]
+> Suite à la mise à jour de l'interface des forums qui a eu lieu le 15 avril 2026, **la librairie n'est actuellement pas en état de fonctionnement**. Une mise à jour n'est pas prévue avant cet été.
+
 **JVClient** est une librairie pour [Node.js](https://nodejs.org/en) qui permet d'interagir avec le site [jeuxvideo.com](https://www.jeuxvideo.com) et son [API `v4`](https://jvflux.fr/Documentation_de_l%27API_Jeuxvideo.com).
 
 **Note : la documentation complète de la librairie est trouvable [à cette adresse](https://contrapunctus-xiv.github.io/jv-client/).**
